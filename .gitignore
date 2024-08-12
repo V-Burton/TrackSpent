@@ -16,24 +16,24 @@
 
 ### Flutter ###
 # Flutter/Dart/Pub related
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
-.pub-cache/
-build/
-android/.gradle/
-android/app/build/
-ios/Pods/
-ios/.symlinks/
-ios/Flutter/Flutter.framework/
-ios/Flutter/Flutter.podspec
-macos/Pods/
-windows/Flutter/ephemeral/
-linux/Flutter/ephemeral/
-web/Flutter/ephemeral/
 *.dart_tool/
-.env
+*.flutter-plugins
+*.flutter-plugins-dependencies
+*.packages
+*.pub-cache/
+*/build/
+*/android/.gradle/
+*/android/app/build/
+*/ios/Pods/
+*/ios/.symlinks/
+*/ios/Flutter/Flutter.framework/
+*/ios/Flutter/Flutter.podspec
+*/macos/Pods/
+*/windows/Flutter/ephemeral/
+*/linux/Flutter/ephemeral/
+*/web/Flutter/ephemeral/
+*.dart_tool/
+*.env
 
 # Generated files
 *.log
@@ -41,9 +41,9 @@ web/Flutter/ephemeral/
 *.tmp
 
 # Ignore IDE specific files
-.idea/
+*.idea/
 *.iml
-.vscode/
+*.vscode/
 *.suo
 *.ntvs*
 *.njsproj
@@ -51,30 +51,30 @@ web/Flutter/ephemeral/
 *.sw?
 
 # Ignore macOS specific files
-.DS_Store
+*.DS_Store
 
 # iOS specific
-ios/Flutter/Generated.xcconfig
-ios/Flutter/Generated.xcconfig.debug
-ios/Flutter/Generated.xcconfig.release
-ios/Flutter/Generated.xcconfig.profile
-ios/Flutter/App.framework
-ios/Flutter/engine/
-ios/ServiceDefinitions.json
-ios/Runner/GeneratedPluginRegistrant.*
-android/key.properties
+*/ios/Flutter/Generated.xcconfig
+*/ios/Flutter/Generated.xcconfig.debug
+*/ios/Flutter/Generated.xcconfig.release
+*/ios/Flutter/Generated.xcconfig.profile
+*/ios/Flutter/App.framework
+*/ios/Flutter/engine/
+*/ios/ServiceDefinitions.json
+*/ios/Runner/GeneratedPluginRegistrant.*
+*/android/key.properties
 
 # Android specific
-**/android/key.properties
+*/android/key.properties
 
 # Web specific
-web/.dart_tool/
+*/web/.dart_tool/
 
 # Linux specific
-linux/flutter/ephemeral/
+*/linux/flutter/ephemeral/
 
 # Windows specific
-windows/flutter/ephemeral/
+*/windows/flutter/ephemeral/
 
 # IntelliJ related files
 *.idea/
