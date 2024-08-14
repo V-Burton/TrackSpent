@@ -27,7 +27,9 @@ class _SortPageState extends State<SortPage> {
               children: [
                 Text('SNCF - Internet', style: TextStyle(fontSize: 18)),
                 SizedBox(height: 8),
-                Text('28.00€', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text('28.00€',
+                    style:
+                        TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),
                 Text('08/08/2024', style: TextStyle(fontSize: 16)),
               ],
@@ -50,7 +52,7 @@ class _SortPageState extends State<SortPage> {
               ElevatedButton(
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
-                  fixedSize:  const Size(100, 100),
+                  fixedSize: const Size(100, 100),
                 ),
                 child: const Text('Food'),
               ),
@@ -78,7 +80,7 @@ class _SortPageState extends State<SortPage> {
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.all(16.0),
             ),
-            child:const Text('Add a Category'),
+            child: const Text('Add a Category'),
           ),
         ],
       ),

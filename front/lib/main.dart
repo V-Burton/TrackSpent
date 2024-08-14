@@ -1,10 +1,16 @@
+// The original content is temporarily commented out to allow generating a self-contained demo - feel free to uncomment later.
+
 import 'package:flutter/material.dart';
 import 'package:front/pages/outcome_page.dart';
 import 'package:front/pages/sort_page.dart';
 
 import 'pages/income_pages.dart';
 
-void main() {
+import 'package:front/src/rust/api/simple.dart';
+import 'package:front/src/rust/frb_generated.dart';
+
+Future<void> main() async {
+  await RustLib.init();
   runApp(const MyApp());
 }
 
@@ -16,7 +22,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  
+
   int _currentIndex = 0;
 
   setCurrentIndex(int index) {
@@ -31,7 +37,7 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           title: [
-            const Text("Sort"),
+            Text("Sort + "),
             const Text("Income"),
             const Text("Outcome"),
             ][_currentIndex],
@@ -69,3 +75,33 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+
+
+// import 'package:flutter/material.dart';
+// import 'package:front/src/rust/api/simple.dart';
+// import 'package:front/src/rust/frb_generated.dart';
+
+// Future<void> main() async {
+//   await RustLib.init();
+//   runApp(const MyApp());
+// }
+
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(title: const Text('flutter_rust_bridge quickstart')),
+//         body: Center(
+//           child: Text(
+//               'Action: Call Rust `greet("Tom")`\nResult: '),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+
