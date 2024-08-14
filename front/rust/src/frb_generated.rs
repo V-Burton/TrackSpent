@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.2.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 873512658;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1921527729;
 
 // Section: executor
 
@@ -369,6 +369,36 @@ fn wire__crate__api__simple__get_spent_list_impl(
         },
     )
 }
+fn wire__crate__api__simple__get_value_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_value",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_indice = <usize>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok(crate::api::simple::get_value(api_indice))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__simple__init_app_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -486,42 +516,28 @@ fn wire__crate__api__simple__push_transaction_to_result_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_result = <RustOpaqueMoi<
-                flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque<Spent>>,
-            >>::sse_decode(&mut deserializer);
             let api_data = <RustOpaqueMoi<
                 flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TransactionsData>,
             >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, ()>((move || {
-                    let mut api_result_guard = None;
                     let mut api_data_guard = None;
                     let decode_indices_ =
                         flutter_rust_bridge::for_generated::lockable_compute_decode_order(vec![
                             flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_result,
-                                0,
-                                true,
-                            ),
-                            flutter_rust_bridge::for_generated::LockableOrderInfo::new(
-                                &api_data, 1, true,
+                                &api_data, 0, true,
                             ),
                         ]);
                     for i in decode_indices_ {
                         match i {
-                            0 => api_result_guard = Some(api_result.lockable_decode_sync_ref_mut()),
-                            1 => api_data_guard = Some(api_data.lockable_decode_sync_ref_mut()),
+                            0 => api_data_guard = Some(api_data.lockable_decode_sync_ref_mut()),
                             _ => unreachable!(),
                         }
                     }
-                    let mut api_result_guard = api_result_guard.unwrap();
                     let mut api_data_guard = api_data_guard.unwrap();
                     let output_ok = Result::<_, ()>::Ok({
-                        crate::api::simple::push_transaction_to_result(
-                            &mut *api_result_guard,
-                            &mut *api_data_guard,
-                        );
+                        crate::api::simple::push_transaction_to_result(&mut *api_data_guard);
                     })?;
                     Ok(output_ok)
                 })())
@@ -540,9 +556,6 @@ flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
 );
 flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
     flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TransactionsData>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque<Spent>>
 );
 
 // Section: dart2rust
@@ -587,16 +600,6 @@ impl SseDecode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpa
 
 impl SseDecode
     for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TransactionsData>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque<Spent>>>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -686,8 +689,8 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        9 => wire__crate__api__simple__intialize_impl(port, ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__simple__push_transaction_to_result_impl(
+        10 => wire__crate__api__simple__intialize_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__simple__push_transaction_to_result_impl(
             port,
             ptr,
             rust_vec_len,
@@ -732,8 +735,9 @@ fn pde_ffi_dispatcher_sync_impl(
             data_len,
         ),
         7 => wire__crate__api__simple__get_spent_list_impl(ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__simple__init_app_impl(ptr, rust_vec_len, data_len),
-        10 => {
+        8 => wire__crate__api__simple__get_value_impl(ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__simple__init_app_impl(ptr, rust_vec_len, data_len),
+        11 => {
             wire__crate__api__simple__load_transactions_from_file_impl(ptr, rust_vec_len, data_len)
         }
         _ => unreachable!(),
@@ -811,17 +815,6 @@ impl SseEncode for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpa
 
 impl SseEncode
     for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TransactionsData>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque<Spent>>>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -962,20 +955,6 @@ mod io {
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TransactionsData>>::decrement_strong_count(ptr as _);
     }
-
-    #[no_mangle]
-    pub extern "C" fn frbgen_front_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque < Spent >>>::increment_strong_count(ptr as _);
-    }
-
-    #[no_mangle]
-    pub extern "C" fn frbgen_front_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque < Spent >>>::decrement_strong_count(ptr as _);
-    }
 }
 #[cfg(not(target_family = "wasm"))]
 pub use io::*;
@@ -1043,20 +1022,6 @@ mod web {
         ptr: *const std::ffi::c_void,
     ) {
         MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TransactionsData>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque < Spent >>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque < Spent >>>::decrement_strong_count(ptr as _);
     }
 }
 #[cfg(target_family = "wasm")]

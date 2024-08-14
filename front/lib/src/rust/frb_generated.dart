@@ -57,7 +57,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.2.0';
 
   @override
-  int get rustContentHash => 873512658;
+  int get rustContentHash => -1921527729;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -85,6 +85,8 @@ abstract class RustLibApi extends BaseApi {
 
   List<Spent> crateApiSimpleGetSpentList();
 
+  String crateApiSimpleGetValue({required BigInt indice});
+
   void crateApiSimpleInitApp();
 
   Future<void> crateApiSimpleIntialize();
@@ -92,7 +94,7 @@ abstract class RustLibApi extends BaseApi {
   void crateApiSimpleLoadTransactionsFromFile({required String filePath});
 
   Future<void> crateApiSimplePushTransactionToResult(
-      {required VecDequeSpent result, required TransactionsData data});
+      {required TransactionsData data});
 
   RustArcIncrementStrongCountFnType
       get rust_arc_increment_strong_count_NaiveDate;
@@ -116,15 +118,6 @@ abstract class RustLibApi extends BaseApi {
 
   CrossPlatformFinalizerArg
       get rust_arc_decrement_strong_count_TransactionsDataPtr;
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_VecDequeSpent;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_VecDequeSpent;
-
-  CrossPlatformFinalizerArg
-      get rust_arc_decrement_strong_count_VecDequeSpentPtr;
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -317,11 +310,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  String crateApiSimpleGetValue({required BigInt indice}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_usize(indice, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiSimpleGetValueConstMeta,
+      argValues: [indice],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiSimpleGetValueConstMeta => const TaskConstMeta(
+        debugName: "get_value",
+        argNames: ["indice"],
+      );
+
+  @override
   void crateApiSimpleInitApp() {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 8)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 9)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -344,7 +360,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 9, port: port_);
+            funcId: 10, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -367,7 +383,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(filePath, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 10)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 11)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -387,23 +403,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<void> crateApiSimplePushTransactionToResult(
-      {required VecDequeSpent result, required TransactionsData data}) {
+      {required TransactionsData data}) {
     return handler.executeNormal(NormalTask(
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-            result, serializer);
         sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTransactionsData(
             data, serializer);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 11, port: port_);
+            funcId: 12, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
         decodeErrorData: null,
       ),
       constMeta: kCrateApiSimplePushTransactionToResultConstMeta,
-      argValues: [result, data],
+      argValues: [data],
       apiImpl: this,
     ));
   }
@@ -411,7 +425,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiSimplePushTransactionToResultConstMeta =>
       const TaskConstMeta(
         debugName: "push_transaction_to_result",
-        argNames: ["result", "data"],
+        argNames: ["data"],
       );
 
   RustArcIncrementStrongCountFnType
@@ -435,14 +449,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   RustArcDecrementStrongCountFnType
       get rust_arc_decrement_strong_count_TransactionsData => wire
           .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTransactionsData;
-
-  RustArcIncrementStrongCountFnType
-      get rust_arc_increment_strong_count_VecDequeSpent => wire
-          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent;
-
-  RustArcDecrementStrongCountFnType
-      get rust_arc_decrement_strong_count_VecDequeSpent => wire
-          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent;
 
   @protected
   NaiveDate
@@ -477,14 +483,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  VecDequeSpent
-      dco_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-          dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return VecDequeSpentImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
   Spent
       dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSpent(
           dynamic raw) {
@@ -514,14 +512,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return TransactionsDataImpl.frbInternalDcoDecode(raw as List<dynamic>);
-  }
-
-  @protected
-  VecDequeSpent
-      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-          dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return VecDequeSpentImpl.frbInternalDcoDecode(raw as List<dynamic>);
   }
 
   @protected
@@ -608,15 +598,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  VecDequeSpent
-      sse_decode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-          SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return VecDequeSpentImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
-  }
-
-  @protected
   Spent
       sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSpent(
           SseDeserializer deserializer) {
@@ -649,15 +630,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return TransactionsDataImpl.frbInternalSseDecode(
-        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
-  }
-
-  @protected
-  VecDequeSpent
-      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-          SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return VecDequeSpentImpl.frbInternalSseDecode(
         sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
   }
 
@@ -765,16 +737,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   void
-      sse_encode_Auto_RefMut_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-          VecDequeSpent self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as VecDequeSpentImpl).frbInternalSseEncode(move: false),
-        serializer);
-  }
-
-  @protected
-  void
       sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSpent(
           Spent self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -807,16 +769,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_usize(
         (self as TransactionsDataImpl).frbInternalSseEncode(move: null),
-        serializer);
-  }
-
-  @protected
-  void
-      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerVecDequeSpent(
-          VecDequeSpent self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_usize(
-        (self as VecDequeSpentImpl).frbInternalSseEncode(move: null),
         serializer);
   }
 
@@ -964,25 +916,5 @@ class TransactionsDataImpl extends RustOpaque implements TransactionsData {
         RustLib.instance.api.rust_arc_decrement_strong_count_TransactionsData,
     rustArcDecrementStrongCountPtr: RustLib
         .instance.api.rust_arc_decrement_strong_count_TransactionsDataPtr,
-  );
-}
-
-@sealed
-class VecDequeSpentImpl extends RustOpaque implements VecDequeSpent {
-  // Not to be used by end users
-  VecDequeSpentImpl.frbInternalDcoDecode(List<dynamic> wire)
-      : super.frbInternalDcoDecode(wire, _kStaticData);
-
-  // Not to be used by end users
-  VecDequeSpentImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
-      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
-
-  static final _kStaticData = RustArcStaticData(
-    rustArcIncrementStrongCount:
-        RustLib.instance.api.rust_arc_increment_strong_count_VecDequeSpent,
-    rustArcDecrementStrongCount:
-        RustLib.instance.api.rust_arc_decrement_strong_count_VecDequeSpent,
-    rustArcDecrementStrongCountPtr:
-        RustLib.instance.api.rust_arc_decrement_strong_count_VecDequeSpentPtr,
   );
 }

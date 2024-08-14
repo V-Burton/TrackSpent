@@ -2,6 +2,8 @@ use std::collections::{HashMap, VecDeque};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
+use std::fs;
+use std::io;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Transaction {
@@ -72,6 +74,11 @@ lazy_static! {
 #[flutter_rust_bridge::frb(sync)]
 pub fn init_app() {
     intialize();
+    let file_content = fs::read_to_string("checkData.json").expect("Unable to read file");
+    let mut data: TransactionsData = serde_json::from_str(&file_content).expect("Unable to parse JSON");
+
+    
+    push_transaction_to_result(&mut data);
 }
 
 pub fn intialize() {
@@ -87,6 +94,7 @@ pub fn intialize() {
     income.insert("Refund".to_string(), Vec::new());
     income.insert("Gift".to_string(), Vec::new());
     income.insert("Other".to_string(), Vec::new());
+
 }
 
 #[flutter_rust_bridge::frb(sync)]
@@ -94,14 +102,14 @@ pub fn load_transactions_from_file(file_path: String) -> Result<(), String> {
     let file_content = std::fs::read_to_string(file_path).expect("Unable to read file");
     let mut data: TransactionsData = serde_json::from_str(&file_content).expect("Unable to parse JSON");
     
-    let mut result = RESULT.lock().unwrap();
-    push_transaction_to_result(&mut result, &mut data);
+    push_transaction_to_result(&mut data);
     
     Ok(())
 }
 
-pub fn push_transaction_to_result(result: &mut VecDeque<Spent>, data: &mut TransactionsData) {
+pub fn push_transaction_to_result(data: &mut TransactionsData) {
     data.transactions.reverse();
+    let mut result = RESULT.lock().unwrap();
     for transaction in &data.transactions {
         let display = &transaction.descriptions.display;
         let date = &transaction.dates.value;
@@ -126,18 +134,9 @@ pub fn get_spent_list() -> Vec<Spent> {
     result.clone().into()
 }
 
-
-// #[flutter_rust_bridge::frb(sync)] // Synchronous mode for simplicity of the demo
-// pub fn greet(name: String) -> String {
-//     format!("Hello, {name}!")
-// }
-
-// #[flutter_rust_bridge::frb(init)]
-// pub fn init_app() {
-//     // // Default utilities - feel free to customize
-//     // flutter_rust_bridge::setup_default_user_utils();
-//     // let mut outcome: HashMap<String, Vec<Spent>> = HashMap::new();
-//     // let mut income: HashMap<String, Vec<Spent>> = HashMap::new();
-
-//     // intialize(&mut outcome, &mut income);
-// }
+#[flutter_rust_bridge::frb(sync)]
+pub fn get_value(indice: usize) -> String {
+    let result = RESULT.lock().unwrap();
+    let value = result[indice].amount;
+    format!("{}", value)
+}

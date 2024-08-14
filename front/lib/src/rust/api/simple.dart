@@ -18,12 +18,13 @@ void loadTransactionsFromFile({required String filePath}) =>
     RustLib.instance.api
         .crateApiSimpleLoadTransactionsFromFile(filePath: filePath);
 
-Future<void> pushTransactionToResult(
-        {required VecDequeSpent result, required TransactionsData data}) =>
-    RustLib.instance.api
-        .crateApiSimplePushTransactionToResult(result: result, data: data);
+Future<void> pushTransactionToResult({required TransactionsData data}) =>
+    RustLib.instance.api.crateApiSimplePushTransactionToResult(data: data);
 
 List<Spent> getSpentList() => RustLib.instance.api.crateApiSimpleGetSpentList();
+
+String getValue({required BigInt indice}) =>
+    RustLib.instance.api.crateApiSimpleGetValue(indice: indice);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Spent>>
 abstract class Spent implements RustOpaqueInterface {
@@ -42,6 +43,3 @@ abstract class Spent implements RustOpaqueInterface {
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TransactionsData>>
 abstract class TransactionsData implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<VecDeque < Spent >>>
-abstract class VecDequeSpent implements RustOpaqueInterface {}
