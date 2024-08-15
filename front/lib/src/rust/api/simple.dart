@@ -10,21 +10,34 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 // These types are ignored because they are not used by any `pub` functions: `Amount`, `Dates`, `Descriptions`, `INCOME`, `OUTCOME`, `RESULT`, `Transaction`, `Types`, `ValueDetail`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `deref`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `initialize`, `initialize`, `initialize`
 
+Future<String> getFormattedDate({required NaiveDate date}) =>
+    RustLib.instance.api.crateApiSimpleGetFormattedDate(date: date);
+
+Future<void> parseAndUseDate({required String dateStr}) =>
+    RustLib.instance.api.crateApiSimpleParseAndUseDate(dateStr: dateStr);
+
 void initApp() => RustLib.instance.api.crateApiSimpleInitApp();
 
 Future<void> intialize() => RustLib.instance.api.crateApiSimpleIntialize();
 
-void loadTransactionsFromFile({required String filePath}) =>
-    RustLib.instance.api
-        .crateApiSimpleLoadTransactionsFromFile(filePath: filePath);
+Future<void> initializeResultWithDummyData() =>
+    RustLib.instance.api.crateApiSimpleInitializeResultWithDummyData();
+
+void loadTransactionsFromFile() =>
+    RustLib.instance.api.crateApiSimpleLoadTransactionsFromFile();
 
 Future<void> pushTransactionToResult({required TransactionsData data}) =>
     RustLib.instance.api.crateApiSimplePushTransactionToResult(data: data);
 
-List<Spent> getSpentList() => RustLib.instance.api.crateApiSimpleGetSpentList();
+Future<Spent?> getSpent() => RustLib.instance.api.crateApiSimpleGetSpent();
 
 String getValue({required BigInt indice}) =>
     RustLib.instance.api.crateApiSimpleGetValue(indice: indice);
+
+BigInt debugResultLength() =>
+    RustLib.instance.api.crateApiSimpleDebugResultLength();
+
+String test() => RustLib.instance.api.crateApiSimpleTest();
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Spent>>
 abstract class Spent implements RustOpaqueInterface {

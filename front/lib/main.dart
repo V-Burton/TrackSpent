@@ -9,8 +9,11 @@ import 'pages/income_pages.dart';
 import 'package:front/src/rust/api/simple.dart';
 import 'package:front/src/rust/frb_generated.dart';
 
+
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await RustLib.init();
+  initApp();
   runApp(const MyApp());
 }
 
@@ -24,6 +27,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
 
   int _currentIndex = 0;
+  final api = RustLib.instance.api;
 
   setCurrentIndex(int index) {
     setState(() {
@@ -32,34 +36,21 @@ class _MyAppState extends State<MyApp> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: [
-            FutureBuilder<List<Spent>>(
-                future: Future<List<Spent>>.value([]),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text("Loading..."); // Affiche un texte pendant le chargement
-                  } else if (snapshot.hasError) {
-                    return const Text("Error loading data"); // Gère les erreurs
-                  } else if (snapshot.hasData) {
-                    return Text("Sortes + ${snapshot.data?.length ?? 0}");
-                  } else {
-                    return const Text("No Data");
-                  }
-              },
-            ),
+            const Text("Sort"),
             const Text("Income"),
             const Text("Outcome"),
             ][_currentIndex],
         ),
         body: [
-          SortPage(),
+          const SortPage(),
           OutcomePage(),
           IncomePage(),
-          const Text("Ajouter un événement")
         ][_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,

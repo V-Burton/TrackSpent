@@ -2,8 +2,6 @@ use std::collections::{HashMap, VecDeque};
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
-use std::fs;
-use std::io;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Transaction {
@@ -71,14 +69,21 @@ lazy_static! {
     static ref RESULT: std::sync::Mutex<VecDeque<Spent>> = std::sync::Mutex::new(VecDeque::new());
 }
 
+pub fn get_formatted_date(date: NaiveDate) -> String {
+    date.format("%Y-%m-%d").to_string()
+}
+
+pub fn parse_and_use_date(date_str: String) -> Result<(), String> {
+    let parsed_date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
+        .map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+
 #[flutter_rust_bridge::frb(sync)]
 pub fn init_app() {
     intialize();
-    let file_content = fs::read_to_string("checkData.json").expect("Unable to read file");
-    let mut data: TransactionsData = serde_json::from_str(&file_content).expect("Unable to parse JSON");
-
-    
-    push_transaction_to_result(&mut data);
+    initialize_result_with_dummy_data();
 }
 
 pub fn intialize() {
@@ -94,12 +99,51 @@ pub fn intialize() {
     income.insert("Refund".to_string(), Vec::new());
     income.insert("Gift".to_string(), Vec::new());
     income.insert("Other".to_string(), Vec::new());
+}
 
+pub fn initialize_result_with_dummy_data() {
+    let mut result = RESULT.lock().unwrap();
+
+    result.push_back(Spent {
+        reason: "Groceries".to_string(),
+        date: NaiveDate::from_ymd_opt(2024, 8, 1).expect("REASON"),
+        amount: -50.25,
+    });
+
+    result.push_back(Spent {
+        reason: "Revenue".to_string(),
+        date: NaiveDate::from_ymd_opt(2024, 8, 12).expect("REASON"),
+        amount: 3400.00,
+    });
+
+    result.push_back(Spent {
+        reason: "Rent".to_string(),
+        date: NaiveDate::from_ymd_opt(2024, 8, 5).expect("REASON"),
+        amount: -1200.00,
+    });
+
+    result.push_back(Spent {
+        reason: "Utilities".to_string(),
+        date: NaiveDate::from_ymd_opt(2024, 8, 7).expect("REASON"),
+        amount: -75.40,
+    });
+
+    result.push_back(Spent {
+        reason: "Dining Out".to_string(),
+        date: NaiveDate::from_ymd_opt(2024, 8, 10).expect("REASON"),
+        amount: -35.70,
+    });
+
+    result.push_back(Spent {
+        reason: "Internet".to_string(),
+        date: NaiveDate::from_ymd_opt(2024, 8, 12).expect("REASON"),
+        amount: -60.00,
+    });
 }
 
 #[flutter_rust_bridge::frb(sync)]
-pub fn load_transactions_from_file(file_path: String) -> Result<(), String> {
-    let file_content = std::fs::read_to_string(file_path).expect("Unable to read file");
+pub fn load_transactions_from_file() -> Result<(), String> {
+    let file_content = std::fs::read_to_string("/Users/victor/Documents/Code/TrackSpent/front/rust/src/checkData.json").expect("Unable to read file");
     let mut data: TransactionsData = serde_json::from_str(&file_content).expect("Unable to parse JSON");
     
     push_transaction_to_result(&mut data);
@@ -124,19 +168,49 @@ pub fn push_transaction_to_result(data: &mut TransactionsData) {
             amount: scaled_value,
         };
 
+        println!("Adding transaction: {:?}", check);
         result.push_front(check);
     }
+    println!("Total transactions in RESULT: {}", result.len());
+
 }
 
-#[flutter_rust_bridge::frb(sync)]
-pub fn get_spent_list() -> Vec<Spent> {
-    let result = RESULT.lock().unwrap();
-    result.clone().into()
+pub fn get_spent() -> Result<Option<Spent>, String> {
+    let mut result = RESULT.lock().unwrap();
+    if result.is_empty() {
+        return Ok(None);
+    }
+    Ok(Some(result.pop_front().unwrap()))
 }
+
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn get_value(indice: usize) -> String {
     let result = RESULT.lock().unwrap();
-    let value = result[indice].amount;
+    let value = result[indice].amount.clone();
     format!("{}", value)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn debug_result_length() -> usize {
+    let result = RESULT.lock().unwrap();
+    result.len()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn test() -> String {
+    println!("Test function called");
+    let res;
+    {
+        let result = RESULT.lock().unwrap();
+        if result.len() < 2 {
+            return format!("Not enough dataaaa");
+        }    
+        let a = result[0].amount;
+        let b = result[1].amount;
+        
+        res = a + b;
+    }
+
+    return format!("{}", res);
 }
