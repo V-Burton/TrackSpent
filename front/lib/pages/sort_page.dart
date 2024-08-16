@@ -22,6 +22,7 @@ class _SortPageState extends State<SortPage> {
   Spent? spent;
   bool positive = true;
 
+  final TextEditingController _categoryController = TextEditingController();
 
 
   @override
@@ -78,6 +79,67 @@ class _SortPageState extends State<SortPage> {
       print('Failed to add spent to income category: $e');
     }
   }
+
+  Future<void> _showAddCategoryDialog(BuildContext context) async {
+    String? newCategory;
+    
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // L'utilisateur doit utiliser les boutons pour fermer le pop-up
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Ajouter une nouvelle catégorie'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                const Text('Entrez le nom de la nouvelle catégorie :'),
+                TextField(
+                  controller: _categoryController,
+                  decoration: const InputDecoration(hintText: "Nom de la catégorie"),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Retour'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Ferme le pop-up sans rien faire
+              },
+            ),
+            ElevatedButton(
+              child: const Text('Valider'),
+              onPressed: () {
+                newCategory = _categoryController.text;
+                // if (_futureKeysIncome.contains(category)) {
+                //   print('La catégorie existe déjà');
+                //   return;
+                // }
+                if (newCategory!.isNotEmpty) {
+                  addNewCategory(category: newCategory!, income: positive);
+                  print('Nouvelle catégorie : $newCategory');
+                  if (positive) {
+                    _addToIncome(newCategory!, spent!);
+                    _futureKeysIncome = getKeysIncome();
+                  } else {
+                    _addToOutcome(newCategory!, spent!);
+                    _futureKeysOutcome = getKeysOutcome();
+                }
+                setState(() {
+                _futureSpent = _loadSpent();
+                });
+                Navigator.of(context).pop(); // Ferme le pop-up
+                } else {
+                  print('Nom de catégorie vide');
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+}
+
 
 @override
 Widget build(BuildContext context) {
@@ -189,9 +251,7 @@ Widget build(BuildContext context) {
 
           ElevatedButton(
             onPressed: () {
-              setState(() {
-                _futureSpent = _loadSpent(); // Recharge un autre Spent
-              });
+              _showAddCategoryDialog(context);
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.all(16.0),
