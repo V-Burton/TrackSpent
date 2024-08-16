@@ -57,6 +57,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
           dynamic raw);
 
   @protected
+  Map<String, double> dco_decode_Map_String_f_64(dynamic raw);
+
+  @protected
   NaiveDate
       dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerNaiveDate(
           dynamic raw);
@@ -92,9 +95,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<(String, double)> dco_decode_list_record_string_f_64(dynamic raw);
+
+  @protected
   Spent?
       dco_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSpent(
           dynamic raw);
+
+  @protected
+  (String, double) dco_decode_record_string_f_64(dynamic raw);
 
   @protected
   int dco_decode_u_8(dynamic raw);
@@ -129,6 +138,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Spent
       sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSpent(
           SseDeserializer deserializer);
+
+  @protected
+  Map<String, double> sse_decode_Map_String_f_64(SseDeserializer deserializer);
 
   @protected
   NaiveDate
@@ -166,9 +178,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<(String, double)> sse_decode_list_record_string_f_64(
+      SseDeserializer deserializer);
+
+  @protected
   Spent?
       sse_decode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSpent(
           SseDeserializer deserializer);
+
+  @protected
+  (String, double) sse_decode_record_string_f_64(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_8(SseDeserializer deserializer);
@@ -208,6 +227,10 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
           Spent self, SseSerializer serializer);
 
   @protected
+  void sse_encode_Map_String_f_64(
+      Map<String, double> self, SseSerializer serializer);
+
+  @protected
   void
       sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerNaiveDate(
           NaiveDate self, SseSerializer serializer);
@@ -244,9 +267,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
       Uint8List self, SseSerializer serializer);
 
   @protected
+  void sse_encode_list_record_string_f_64(
+      List<(String, double)> self, SseSerializer serializer);
+
+  @protected
   void
       sse_encode_opt_box_autoadd_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSpent(
           Spent? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_record_string_f_64(
+      (String, double) self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);

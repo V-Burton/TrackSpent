@@ -26,9 +26,6 @@ void initApp() => RustLib.instance.api.crateApiSimpleInitApp();
 
 Future<void> intialize() => RustLib.instance.api.crateApiSimpleIntialize();
 
-Future<void> initializeResultWithDummyData() =>
-    RustLib.instance.api.crateApiSimpleInitializeResultWithDummyData();
-
 void loadTransactionsFromFile() =>
     RustLib.instance.api.crateApiSimpleLoadTransactionsFromFile();
 
@@ -56,6 +53,18 @@ void addNewCategory({required String category, required bool income}) =>
         .crateApiSimpleAddNewCategory(category: category, income: income);
 
 String test() => RustLib.instance.api.crateApiSimpleTest();
+
+Map<String, double> getOutcomeData() =>
+    RustLib.instance.api.crateApiSimpleGetOutcomeData();
+
+Map<String, double> getIncomeData() =>
+    RustLib.instance.api.crateApiSimpleGetIncomeData();
+
+///
+///
+/// ///
+Future<void> initializeResultWithDummyData() =>
+    RustLib.instance.api.crateApiSimpleInitializeResultWithDummyData();
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Spent>>
 abstract class Spent implements RustOpaqueInterface {

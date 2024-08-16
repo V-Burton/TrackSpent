@@ -1,92 +1,104 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:front/src/rust/api/simple.dart';
+import 'dart:math';
 
-class OutcomePage extends StatelessWidget {
+
+class OutcomePage extends StatefulWidget {
+  const OutcomePage({Key? key}) : super(key: key);
+  @override
+  State<OutcomePage> createState() => _OutcomePageState();
+}
+
+class _OutcomePageState extends State<OutcomePage> {
+  late Future<Map<String, double>> _getOutcomeData;
+
+  @override
+  void initState() {
+    super.initState();
+    _getOutcomeData = loadGetOutcomeData();
+  }
+
+  Future<Map<String, double>> loadGetOutcomeData() async {
+    return await getOutcomeData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Circular Chart with Total Amount
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
+        child: FutureBuilder<Map<String, double>>(
+          future: _getOutcomeData, // Appel à la fonction Rust pour récupérer les données
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return Center(child: Text('No data available'));
+            } else {
+              final data = snapshot.data!;
+              final totalAmount = data.values.fold(0.0, (sum, value) => sum + value);
+              return Column(
                 children: [
-                  // Circular Pie Chart
-                  SizedBox(
-                    width: 200,
-                    height: 200,
-                    child: PieChart(
-                      PieChartData(
-                        sections: _buildPieChartSections(),
-                        centerSpaceRadius: 60,
-                      ),
+                  // Circular Chart with Total Amount
+                  Center(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Circular Pie Chart
+                        SizedBox(
+                          width: 200,
+                          height: 200,
+                          child: PieChart(
+                            PieChartData(
+                              sections: _buildPieChartSections(data),
+                              centerSpaceRadius: 60,
+                            ),
+                          ),
+                        ),
+                        // Total Amount Text
+                        Text(
+                          '${totalAmount.toStringAsFixed(2)}€',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  // Total Amount Text
-                  Text(
-                    '1263,08€',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 40),
+                  SizedBox(height: 40),
 
-            // Breakdown List
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildBreakdownItem('SAVE', '280,00€'),
-                  _buildBreakdownItem('Charge', '783,00€'),
-                  _buildBreakdownItem('Other', '100,00€'),
-                  _buildBreakdownItem('Food', '100,00€'),
+                  // Breakdown List
+                  Expanded(
+                    child: ListView(
+                      children: data.entries.map((entry) {
+                        return _buildBreakdownItem(entry.key, '${entry.value.toStringAsFixed(2)}€');
+                      }).toList(),
+                    ),
+                  ),
                 ],
-              ),
-            ),
-          ],
+              );
+            }
+          },
         ),
       ),
     );
   }
 
   // Helper method to build Pie Chart Sections
-  List<PieChartSectionData> _buildPieChartSections() {
-    return [
-      PieChartSectionData(
-        color: Colors.blue,
-        value: 280,
-        title: 'Save',
+  List<PieChartSectionData> _buildPieChartSections(Map<String, double> data) {
+    return data.entries.map((entry) {
+      return PieChartSectionData(
+        color: _getRandomColor(),
+        value: entry.value,
+        title: entry.key,
         radius: 40,
         titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      ),
-      PieChartSectionData(
-        color: Colors.red,
-        value: 783,
-        title: 'Charge',
-        radius: 40,
-        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      ),
-      PieChartSectionData(
-        color: Colors.green,
-        value: 100,
-        title: 'Other',
-        radius: 40,
-        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      ),
-      PieChartSectionData(
-        color: Colors.orange,
-        value: 100,
-        title: 'Food',
-        radius: 40,
-        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      ),
-    ];
+      );
+    }).toList();
   }
 
   // Helper method to build Breakdown List Items
@@ -108,4 +120,15 @@ class OutcomePage extends StatelessWidget {
       ),
     );
   }
+
+Color _getRandomColor() {
+  final Random random = Random();
+  // Génère une couleur aléatoire
+  return Color.fromARGB(
+    255, // Alpha, valeur fixe pour une opacité maximale
+    random.nextInt(256), // Rouge (0-255)
+    random.nextInt(256), // Vert (0-255)
+    random.nextInt(256), // Bleu (0-255)
+  );
+}
 }
