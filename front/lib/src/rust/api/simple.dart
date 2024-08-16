@@ -16,6 +16,12 @@ Future<String> getFormattedDate({required NaiveDate date}) =>
 Future<void> parseAndUseDate({required String dateStr}) =>
     RustLib.instance.api.crateApiSimpleParseAndUseDate(dateStr: dateStr);
 
+List<String> getKeyOutcome() =>
+    RustLib.instance.api.crateApiSimpleGetKeyOutcome();
+
+List<String> getKeyIncome() =>
+    RustLib.instance.api.crateApiSimpleGetKeyIncome();
+
 void initApp() => RustLib.instance.api.crateApiSimpleInitApp();
 
 Future<void> intialize() => RustLib.instance.api.crateApiSimpleIntialize();
@@ -36,6 +42,18 @@ String getValue({required BigInt indice}) =>
 
 BigInt debugResultLength() =>
     RustLib.instance.api.crateApiSimpleDebugResultLength();
+
+void addToIncome({required String category, required Spent spent}) =>
+    RustLib.instance.api
+        .crateApiSimpleAddToIncome(category: category, spent: spent);
+
+void addToOutcome({required String category, required Spent spent}) =>
+    RustLib.instance.api
+        .crateApiSimpleAddToOutcome(category: category, spent: spent);
+
+void addNewCategory({required String category, required bool income}) =>
+    RustLib.instance.api
+        .crateApiSimpleAddNewCategory(category: category, income: income);
 
 String test() => RustLib.instance.api.crateApiSimpleTest();
 

@@ -81,6 +81,18 @@ pub fn parse_and_use_date(date_str: String) -> Result<(), String> {
 }
 
 #[flutter_rust_bridge::frb(sync)]
+pub fn get_key_outcome() -> Vec<String> {
+    let outcome = OUTCOME.lock().unwrap();
+    outcome.keys().cloned().collect()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn get_key_income() -> Vec<String> {
+    let income = INCOME.lock().unwrap();
+    income.keys().cloned().collect()
+}
+
+#[flutter_rust_bridge::frb(sync)]
 pub fn init_app() {
     intialize();
     initialize_result_with_dummy_data();
@@ -195,6 +207,31 @@ pub fn get_value(indice: usize) -> String {
 pub fn debug_result_length() -> usize {
     let result = RESULT.lock().unwrap();
     result.len()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn add_to_income(category: &str, spent: Spent) {
+    let mut income = INCOME.lock().unwrap();
+    let mut category_spent = income.get_mut(category).unwrap();
+    category_spent.push(spent);
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn add_to_outcome(category: &str, spent: Spent) {
+    let mut outcome = OUTCOME.lock().unwrap();
+    let mut category_spent = outcome.get_mut(category).unwrap();
+    category_spent.push(spent);
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn add_new_category(category: &str, income: bool) {
+    if income {
+        let mut income = INCOME.lock().unwrap();
+        income.insert(category.to_string(), Vec::new());
+    } else {
+        let mut outcome = OUTCOME.lock().unwrap();
+        outcome.insert(category.to_string(), Vec::new());
+    }
 }
 
 #[flutter_rust_bridge::frb(sync)]

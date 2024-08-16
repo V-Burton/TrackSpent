@@ -17,22 +17,68 @@ class SortPage extends StatefulWidget {
 
 class _SortPageState extends State<SortPage> {
   late Future<Spent?> _futureSpent;
+  late Future<List<String>> _futureKeysIncome;
+  late Future<List<String>> _futureKeysOutcome;
+  Spent? spent;
+  bool positive = true;
+
 
 
   @override
   void initState() {
     super.initState();
     _futureSpent = _loadSpent();
+    _futureKeysIncome = getKeysIncome();
+    _futureKeysOutcome = getKeysOutcome();
+
   }
 
 
   Future<Spent?> _loadSpent() async {
     try {
-      return await getSpent(); // Appelle la fonction Rust
+      final spent = await getSpent(); // Appelle la fonction Rust
+      if (spent != null) {
+        setState(() {
+          positive = spent.amount > 0;
+          if (positive) {
+            _futureKeysIncome = getKeysIncome();
+          } else {
+            _futureKeysOutcome = getKeysOutcome();
+          }
+        });
+      }
+      return spent;
     } catch (e) {
       return null; // Retourne null en cas d'erreur
     }
   }
+
+  Future<List<String>> getKeysIncome() async {
+    return await getKeyIncome();
+  }
+
+  Future<List<String>> getKeysOutcome() async {
+    return await getKeyOutcome();
+  }
+
+  Future<void> _addToIncome(String category, Spent spent) async {
+    try {
+      addToIncome(category: category, spent: spent); 
+      print('Spent added to income category: $category');
+    } catch (e) {
+      print('Failed to add spent to income category: $e');
+    }
+  }
+
+  Future<void> _addToOutcome(String category, Spent spent) async {
+    try {
+      addToOutcome(category: category, spent: spent); 
+      print('Spent added to income category: $category');
+    } catch (e) {
+      print('Failed to add spent to income category: $e');
+    }
+  }
+
 @override
 Widget build(BuildContext context) {
   return Padding(
@@ -60,18 +106,23 @@ Widget build(BuildContext context) {
                   } else if (!snapshot.hasData || snapshot.data == null) {
                     return const Text('No more Spent to categorize');
                   } else {
-                    final spent = snapshot.data!;
+                    spent = snapshot.data!;
+                    if (spent!.amount > 0) {
+                      positive = true;
+                    } else {
+                      positive = false;
+                    }
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(spent.reason, style: const TextStyle(fontSize: 16)),
+                        Text(spent!.reason, style: const TextStyle(fontSize: 16)),
                         const SizedBox(height: 8),
-                        Text('${spent.amount}€',
+                        Text('${spent!.amount}€',
                             style: const TextStyle(
                                 fontSize: 24, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
                         FutureBuilder<String?>(
-                          future: getFormattedDate(date: spent.date),
+                          future: getFormattedDate(date: spent!.date),
                           builder: (context, dateSnapshot) {
                             if (dateSnapshot.connectionState == ConnectionState.waiting) {
                               return const CircularProgressIndicator();
@@ -95,42 +146,44 @@ Widget build(BuildContext context) {
             ],
           ),
         ),
-          const SizedBox(height: 20),
+        const SizedBox(height: 20),
 
-           // Category Buttons
-          Wrap(
-            spacing: 20,
-            runSpacing: 20,
-            children: [
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(100, 100),
-                ),
-                child: const Text('SAVE'),
-              ),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(100, 100),
-                ),
-                child: const Text('Food'),
-              ),
-              ElevatedButton(
-                onPressed: () {},
-                child: const Text('Other'),
-                style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(100, 100),
-                ),
-              ),
-              ElevatedButton(
-                onPressed: () {},
-                style: ElevatedButton.styleFrom(
-                  fixedSize: const Size(100, 100),
-                ),
-                child: const Text('Things'),
-              ),
-            ],
+          // FutureBuilder for dynamic buttons
+          FutureBuilder<List<String>>(
+            future: positive ? _futureKeysIncome : _futureKeysOutcome,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator(); // Display a loading indicator while waiting
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
+                // Create buttons dynamically based on the keys
+                return Wrap(
+                  spacing: 20,
+                  runSpacing: 20,
+                  children: snapshot.data!.map((key) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        if (positive) {
+                          _addToIncome(key, spent!);
+                        } else {
+                          _addToOutcome(key, spent!);
+                        }
+                        setState(() {
+                          _futureSpent = _loadSpent();
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        fixedSize: const Size(100, 100),
+                      ),
+                      child: Text(key),
+                    );
+                  }).toList(),
+                );
+              } else {
+                return const Text('No data');
+              }
+            },
           ),
           const SizedBox(height: 20),
 
