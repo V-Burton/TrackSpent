@@ -74,7 +74,7 @@ pub fn get_formatted_date(date: NaiveDate) -> String {
 }
 
 pub fn parse_and_use_date(date_str: String) -> Result<(), String> {
-    let parsed_date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
+    let _parsed_date = NaiveDate::parse_from_str(&date_str, "%Y-%m-%d")
         .map_err(|e| e.to_string())?;
     
     Ok(())
@@ -148,11 +148,16 @@ pub fn push_transaction_to_result(data: &mut TransactionsData) {
 }
 
 pub fn get_spent() -> Result<Option<Spent>, String> {
-    let mut result = RESULT.lock().unwrap();
+    let result = RESULT.lock().unwrap();
     if result.is_empty() {
         return Ok(None);
     }
-    Ok(Some(result.pop_front().unwrap()))
+    Ok(Some(result.front().unwrap().clone()))
+}
+
+fn remove_spent() {
+    let mut result = RESULT.lock().unwrap();
+    result.pop_front();
 }
 
 
@@ -172,15 +177,17 @@ pub fn debug_result_length() -> usize {
 #[flutter_rust_bridge::frb(sync)]
 pub fn add_to_income(category: &str, spent: Spent) {
     let mut income = INCOME.lock().unwrap();
-    let mut category_spent = income.get_mut(category).unwrap();
+    let category_spent = income.get_mut(category).unwrap();
     category_spent.push(spent);
+    remove_spent();
 }
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn add_to_outcome(category: &str, spent: Spent) {
     let mut outcome = OUTCOME.lock().unwrap();
-    let mut category_spent = outcome.get_mut(category).unwrap();
+    let  category_spent = outcome.get_mut(category).unwrap();
     category_spent.push(spent);
+    remove_spent();
 }
 
 #[flutter_rust_bridge::frb(sync)]
@@ -234,63 +241,63 @@ pub fn initialize_result_with_dummy_data() {
     let mut result = RESULT.lock().unwrap();
 
     let data = vec![
-        ("Groceries", NaiveDate::from_ymd(2024, 8, 1), -50.25),
-        ("Revenue", NaiveDate::from_ymd(2024, 8, 12), 3400.00),
-        ("Rent", NaiveDate::from_ymd(2024, 8, 5), -1200.00),
-        ("Utilities", NaiveDate::from_ymd(2024, 8, 7), -75.40),
-        ("Dining Out", NaiveDate::from_ymd(2024, 8, 10), -35.70),
-        ("Internet", NaiveDate::from_ymd(2024, 8, 12), -60.00),
-        ("Transportation", NaiveDate::from_ymd(2024, 8, 13), -45.00),
-        ("Books", NaiveDate::from_ymd(2024, 8, 14), -30.00),
-        ("Gym Membership", NaiveDate::from_ymd(2024, 8, 15), -55.00),
-        ("Movie Tickets", NaiveDate::from_ymd(2024, 8, 16), -25.00),
-        ("Subscriptions", NaiveDate::from_ymd(2024, 8, 17), -40.00),
-        ("Phone Bill", NaiveDate::from_ymd(2024, 8, 18), -70.00),
-        ("Medical", NaiveDate::from_ymd(2024, 8, 19), -90.00),
-        ("Clothing", NaiveDate::from_ymd(2024, 8, 20), -85.00),
-        ("Coffee", NaiveDate::from_ymd(2024, 8, 21), -15.00),
-        ("Books", NaiveDate::from_ymd(2024, 8, 22), -35.00),
-        ("Supplies", NaiveDate::from_ymd(2024, 8, 23), -22.50),
-        ("Rent", NaiveDate::from_ymd(2024, 8, 24), -1200.00),
-        ("Groceries", NaiveDate::from_ymd(2024, 8, 25), -52.75),
-        ("Dining Out", NaiveDate::from_ymd(2024, 8, 26), -40.00),
-        ("Utilities", NaiveDate::from_ymd(2024, 8, 27), -77.00),
-        ("Internet", NaiveDate::from_ymd(2024, 8, 28), -62.00),
-        ("Transportation", NaiveDate::from_ymd(2024, 8, 29), -47.50),
-        ("Books", NaiveDate::from_ymd(2024, 8, 30), -28.00),
-        ("Medical", NaiveDate::from_ymd(2024, 8, 31), -95.00),
-        ("Coffee", NaiveDate::from_ymd(2024, 8, 2), -18.00),
-        ("Supplies", NaiveDate::from_ymd(2024, 8, 3), -20.00),
-        ("Phone Bill", NaiveDate::from_ymd(2024, 8, 4), -75.00),
-        ("Subscriptions", NaiveDate::from_ymd(2024, 8, 6), -42.00),
-        ("Transportation", NaiveDate::from_ymd(2024, 8, 8), -50.00),
-        ("Books", NaiveDate::from_ymd(2024, 8, 9), -33.00),
-        ("Medical", NaiveDate::from_ymd(2024, 8, 11), -88.00),
-        ("Clothing", NaiveDate::from_ymd(2024, 8, 13), -60.00),
-        ("Coffee", NaiveDate::from_ymd(2024, 8, 14), -20.00),
-        ("Dining Out", NaiveDate::from_ymd(2024, 8, 15), -35.00),
-        ("Groceries", NaiveDate::from_ymd(2024, 8, 16), -55.00),
-        ("Rent", NaiveDate::from_ymd(2024, 8, 17), -1200.00),
-        ("Utilities", NaiveDate::from_ymd(2024, 8, 18), -80.00),
-        ("Internet", NaiveDate::from_ymd(2024, 8, 19), -65.00),
-        ("Transportation", NaiveDate::from_ymd(2024, 8, 20), -55.00),
-        ("Books", NaiveDate::from_ymd(2024, 8, 21), -30.00),
-        ("Medical", NaiveDate::from_ymd(2024, 8, 22), -90.00),
-        ("Clothing", NaiveDate::from_ymd(2024, 8, 23), -85.00),
-        ("Supplies", NaiveDate::from_ymd(2024, 8, 24), -25.00),
-        ("Coffee", NaiveDate::from_ymd(2024, 8, 25), -22.00),
-        ("Phone Bill", NaiveDate::from_ymd(2024, 8, 26), -70.00),
-        ("Subscriptions", NaiveDate::from_ymd(2024, 8, 27), -45.00),
-        ("Dining Out", NaiveDate::from_ymd(2024, 8, 28), -32.00),
-        ("Groceries", NaiveDate::from_ymd(2024, 8, 29), -55.00),
-        ("Transportation", NaiveDate::from_ymd(2024, 8, 30), -60.00),
-        ("Medical", NaiveDate::from_ymd(2024, 8, 31), -85.00),
+        ("Groceries", NaiveDate::from_ymd_opt(2024, 8, 1), -50.25),
+        ("Revenue", NaiveDate::from_ymd_opt(2024, 8, 12), 3400.00),
+        ("Rent", NaiveDate::from_ymd_opt(2024, 8, 5), -1200.00),
+        ("Utilities", NaiveDate::from_ymd_opt(2024, 8, 7), -75.40),
+        ("Dining Out", NaiveDate::from_ymd_opt(2024, 8, 10), -35.70),
+        ("Internet", NaiveDate::from_ymd_opt(2024, 8, 12), -60.00),
+        ("Transportation", NaiveDate::from_ymd_opt(2024, 8, 13), -45.00),
+        ("Books", NaiveDate::from_ymd_opt(2024, 8, 14), -30.00),
+        ("Gym Membership", NaiveDate::from_ymd_opt(2024, 8, 15), -55.00),
+        ("Movie Tickets", NaiveDate::from_ymd_opt(2024, 8, 16), -25.00),
+        ("Subscriptions", NaiveDate::from_ymd_opt(2024, 8, 17), -40.00),
+        ("Phone Bill", NaiveDate::from_ymd_opt(2024, 8, 18), -70.00),
+        ("Medical", NaiveDate::from_ymd_opt(2024, 8, 19), -90.00),
+        ("Clothing", NaiveDate::from_ymd_opt(2024, 8, 20), -85.00),
+        ("Coffee", NaiveDate::from_ymd_opt(2024, 8, 21), -15.00),
+        ("Books", NaiveDate::from_ymd_opt(2024, 8, 22), -35.00),
+        ("Supplies", NaiveDate::from_ymd_opt(2024, 8, 23), -22.50),
+        ("Rent", NaiveDate::from_ymd_opt(2024, 8, 24), -1200.00),
+        ("Groceries", NaiveDate::from_ymd_opt(2024, 8, 25), -52.75),
+        ("Dining Out", NaiveDate::from_ymd_opt(2024, 8, 26), -40.00),
+        ("Utilities", NaiveDate::from_ymd_opt(2024, 8, 27), -77.00),
+        ("Internet", NaiveDate::from_ymd_opt(2024, 8, 28), -62.00),
+        ("Transportation", NaiveDate::from_ymd_opt(2024, 8, 29), -47.50),
+        ("Books", NaiveDate::from_ymd_opt(2024, 8, 30), -28.00),
+        ("Medical", NaiveDate::from_ymd_opt(2024, 8, 31), -95.00),
+        ("Coffee", NaiveDate::from_ymd_opt(2024, 8, 2), -18.00),
+        ("Supplies", NaiveDate::from_ymd_opt(2024, 8, 3), -20.00),
+        ("Phone Bill", NaiveDate::from_ymd_opt(2024, 8, 4), -75.00),
+        ("Subscriptions", NaiveDate::from_ymd_opt(2024, 8, 6), -42.00),
+        ("Transportation", NaiveDate::from_ymd_opt(2024, 8, 8), -50.00),
+        ("Books", NaiveDate::from_ymd_opt(2024, 8, 9), -33.00),
+        ("Medical", NaiveDate::from_ymd_opt(2024, 8, 11), -88.00),
+        ("Clothing", NaiveDate::from_ymd_opt(2024, 8, 13), -60.00),
+        ("Coffee", NaiveDate::from_ymd_opt(2024, 8, 14), -20.00),
+        ("Dining Out", NaiveDate::from_ymd_opt(2024, 8, 15), -35.00),
+        ("Groceries", NaiveDate::from_ymd_opt(2024, 8, 16), -55.00),
+        ("Rent", NaiveDate::from_ymd_opt(2024, 8, 17), -1200.00),
+        ("Utilities", NaiveDate::from_ymd_opt(2024, 8, 18), -80.00),
+        ("Internet", NaiveDate::from_ymd_opt(2024, 8, 19), -65.00),
+        ("Transportation", NaiveDate::from_ymd_opt(2024, 8, 20), -55.00),
+        ("Books", NaiveDate::from_ymd_opt(2024, 8, 21), -30.00),
+        ("Medical", NaiveDate::from_ymd_opt(2024, 8, 22), -90.00),
+        ("Clothing", NaiveDate::from_ymd_opt(2024, 8, 23), -85.00),
+        ("Supplies", NaiveDate::from_ymd_opt(2024, 8, 24), -25.00),
+        ("Coffee", NaiveDate::from_ymd_opt(2024, 8, 25), -22.00),
+        ("Phone Bill", NaiveDate::from_ymd_opt(2024, 8, 26), -70.00),
+        ("Subscriptions", NaiveDate::from_ymd_opt(2024, 8, 27), -45.00),
+        ("Dining Out", NaiveDate::from_ymd_opt(2024, 8, 28), -32.00),
+        ("Groceries", NaiveDate::from_ymd_opt(2024, 8, 29), -55.00),
+        ("Transportation", NaiveDate::from_ymd_opt(2024, 8, 30), -60.00),
+        ("Medical", NaiveDate::from_ymd_opt(2024, 8, 31), -85.00),
     ];
 
     for (reason, date, amount) in data {
         result.push_back(Spent {
             reason: reason.to_string(),
-            date,
+            date: date.unwrap(),
             amount,
         });
     }

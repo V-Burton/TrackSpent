@@ -3,7 +3,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:front/src/rust/api/simple.dart';
 import 'dart:math';
 
-
 class OutcomePage extends StatefulWidget {
   const OutcomePage({Key? key}) : super(key: key);
   @override
@@ -29,7 +28,8 @@ class _OutcomePageState extends State<OutcomePage> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FutureBuilder<Map<String, double>>(
-          future: _getOutcomeData, // Appel à la fonction Rust pour récupérer les données
+          future:
+              _getOutcomeData, // Appel à la fonction Rust pour récupérer les données
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
@@ -39,7 +39,8 @@ class _OutcomePageState extends State<OutcomePage> {
               return Center(child: Text('No data available'));
             } else {
               final data = snapshot.data!;
-              final totalAmount = data.values.fold(0.0, (sum, value) => sum + value);
+              final totalAmount =
+                  data.values.fold(0.0, (sum, value) => sum + value);
               return Column(
                 children: [
                   // Circular Chart with Total Amount
@@ -75,7 +76,8 @@ class _OutcomePageState extends State<OutcomePage> {
                   Expanded(
                     child: ListView(
                       children: data.entries.map((entry) {
-                        return _buildBreakdownItem(entry.key, '${entry.value.toStringAsFixed(2)}€');
+                        return _buildBreakdownItem(
+                            entry.key, '${entry.value.toStringAsFixed(2)}€');
                       }).toList(),
                     ),
                   ),
@@ -121,14 +123,14 @@ class _OutcomePageState extends State<OutcomePage> {
     );
   }
 
-Color _getRandomColor() {
-  final Random random = Random();
-  // Génère une couleur aléatoire
-  return Color.fromARGB(
-    255, // Alpha, valeur fixe pour une opacité maximale
-    random.nextInt(256), // Rouge (0-255)
-    random.nextInt(256), // Vert (0-255)
-    random.nextInt(256), // Bleu (0-255)
-  );
-}
+  Color _getRandomColor() {
+    final Random random = Random();
+    // Génère une couleur aléatoire
+    return Color.fromARGB(
+      255, // Alpha, valeur fixe pour une opacité maximale
+      random.nextInt(256), // Rouge (0-255)
+      random.nextInt(256), // Vert (0-255)
+      random.nextInt(256), // Bleu (0-255)
+    );
+  }
 }
