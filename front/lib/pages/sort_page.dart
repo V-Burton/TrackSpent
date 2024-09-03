@@ -103,18 +103,26 @@ class _SortPageState extends State<SortPage> {
               child: const Text('Valider'),
               onPressed: () {
                 newCategory = _categoryController.text;
-                // if (_futureKeysIncome.contains(category)) {
-                //   print('La catégorie existe déjà');
-                //   return;
-                // }
                 if (newCategory!.isNotEmpty) {
-                  addNewCategory(category: newCategory!, income: positive);
-                  if (positive) {
-                    _addToIncome(newCategory!, spent!);
-                    _futureKeysIncome = getKeysIncome();
-                  } else {
-                    _addToOutcome(newCategory!, spent!);
-                    _futureKeysOutcome = getKeysOutcome();
+                  List<String> list = positive
+                      ? getKeyIncome()
+                      : getKeyOutcome();
+                      print(list.contains(newCategory));
+                  if (list.contains(newCategory)) {
+                    if (positive) {
+                      _addToIncome(newCategory!, spent!);
+                    } else {
+                      _addToOutcome(newCategory!, spent!);
+                    }
+                  } else  {
+                    addNewCategory(category: newCategory!, income: positive);
+                    if (positive) {
+                      _addToIncome(newCategory!, spent!);
+                      _futureKeysIncome = getKeysIncome();
+                    } else {
+                      _addToOutcome(newCategory!, spent!);
+                      _futureKeysOutcome = getKeysOutcome();
+                    }
                   }
                   setState(() {
                     _futureSpent = _loadSpent();
