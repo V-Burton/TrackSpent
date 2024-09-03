@@ -79,31 +79,33 @@ class _SortPageState extends State<SortPage> {
           false, // L'utilisateur doit utiliser les boutons pour fermer le pop-up
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Ajouter une nouvelle catégorie'),
+          title: const Text('Add a new category'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text('Entrez le nom de la nouvelle catégorie :'),
+                const Text('Enter the name of the new category :'),
                 TextField(
                   controller: _categoryController,
                   decoration:
-                      const InputDecoration(hintText: "Nom de la catégorie"),
+                      const InputDecoration(hintText: "Category name"),
                 ),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: const Text('Retour'),
+              child: const Text('Return'),
               onPressed: () {
                 Navigator.of(context).pop(); // Ferme le pop-up sans rien faire
               },
             ),
             ElevatedButton(
-              child: const Text('Valider'),
+              child: const Text('Validate'),
               onPressed: () {
+                // return input[0].toUpperCase() + input.substring(1).toLowerCase();
                 newCategory = _categoryController.text;
                 if (newCategory!.isNotEmpty) {
+                newCategory = newCategory![0].toUpperCase() + newCategory!.substring(1).toLowerCase();
                   List<String> list = positive
                       ? getKeyIncome()
                       : getKeyOutcome();
