@@ -7,6 +7,7 @@ import '../frb_generated.dart';
 import '../lib.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
+// These functions are ignored because they are not marked as `pub`: `remove_spent`
 // These types are ignored because they are not used by any `pub` functions: `Amount`, `Dates`, `Descriptions`, `INCOME`, `OUTCOME`, `RESULT`, `Transaction`, `Types`, `ValueDetail`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `deref`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `initialize`, `initialize`, `initialize`
 
@@ -59,6 +60,16 @@ Map<String, double> getOutcomeData() =>
 
 Map<String, double> getIncomeData() =>
     RustLib.instance.api.crateApiSimpleGetIncomeData();
+
+Map<String, double> getOutcomeDataByDate(
+        {required String monthStr, required String yearStr}) =>
+    RustLib.instance.api.crateApiSimpleGetOutcomeDataByDate(
+        monthStr: monthStr, yearStr: yearStr);
+
+Map<String, double> getIncomeDataByDate(
+        {required String monthStr, required String yearStr}) =>
+    RustLib.instance.api.crateApiSimpleGetIncomeDataByDate(
+        monthStr: monthStr, yearStr: yearStr);
 
 ///
 ///

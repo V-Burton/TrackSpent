@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
 import 'package:front/src/rust/api/simple.dart';
-import 'dart:math';
+import 'piechart.dart';
+import 'carousel.dart';
+import 'expense_list.dart';
 
 class OutcomePage extends StatefulWidget {
   const OutcomePage({Key? key}) : super(key: key);
+
   @override
-  State<OutcomePage> createState() => _OutcomePageState();
+  _OutcomePageState createState() => _OutcomePageState();
 }
 
 class _OutcomePageState extends State<OutcomePage> {
   late Future<Map<String, double>> _getOutcomeData;
+  String selectedMonth =
+      DateTime.now().month.toString(); // Mois sélectionné par défaut
+  String selectedYear = DateTime.now().year.toString(); // Année sélectionnée par défaut
 
   @override
   void initState() {
@@ -18,119 +23,66 @@ class _OutcomePageState extends State<OutcomePage> {
     _getOutcomeData = loadGetOutcomeData();
   }
 
+
   Future<Map<String, double>> loadGetOutcomeData() async {
-    return await getOutcomeData();
+    return getOutcomeDataByDate(monthStr: selectedMonth, yearStr: selectedYear);
+  }
+
+  void _updateOutcomeData() {
+    setState(() {
+      _getOutcomeData = loadGetOutcomeData();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<Map<String, double>>(
-          future:
-              _getOutcomeData, // Appel à la fonction Rust pour récupérer les données
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('No data available'));
-            } else {
-              final data = snapshot.data!;
-              final totalAmount =
-                  data.values.fold(0.0, (sum, value) => sum + value);
-              return Column(
-                children: [
-                  // Circular Chart with Total Amount
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Circular Pie Chart
-                        SizedBox(
-                          width: 200,
-                          height: 200,
-                          child: PieChart(
-                            PieChartData(
-                              sections: _buildPieChartSections(data),
-                              centerSpaceRadius: 60,
-                            ),
-                          ),
-                        ),
-                        // Total Amount Text
-                        Text(
-                          '${totalAmount.toStringAsFixed(2)}€',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 40),
+        body: FutureBuilder<Map<String, double>>(
+            future: _getOutcomeData,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (snapshot.hasData) {
+                Map<String, double> outcomeData = snapshot.data!;
+                return _buildOutcomeChart(outcomeData);
+              } else {
+                return const Center(child: Text('No data available'));
+              }
+            }));
+  }
 
-                  // Breakdown List
-                  Expanded(
-                    child: ListView(
-                      children: data.entries.map((entry) {
-                        return _buildBreakdownItem(
-                            entry.key, '${entry.value.toStringAsFixed(2)}€');
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              );
-            }
+  Widget _buildOutcomeChart(Map<String, double> outcomeData) {
+    return Scaffold(
+        body: Column(
+      children: [
+        PieChartWidget(data: outcomeData),
+        const SizedBox(height: 20),
+        CarouselWidget(
+            items:
+                "January February March April May June July August September October November December"
+                    .split(" "),
+            onItemSelected: (selected) {
+              setState(() {
+                selectedMonth = selected;
+              }
+            );
+          }
+        ),
+        CarouselWidget(
+          items: "2023 2024".split(" "),
+          onItemSelected: (selected) {
+            setState(() {
+              selectedYear = selected;
+            });
           },
         ),
-      ),
-    );
-  }
-
-  // Helper method to build Pie Chart Sections
-  List<PieChartSectionData> _buildPieChartSections(Map<String, double> data) {
-    return data.entries.map((entry) {
-      return PieChartSectionData(
-        color: _getRandomColor(),
-        value: entry.value,
-        title: entry.key,
-        radius: 40,
-        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      );
-    }).toList();
-  }
-
-  // Helper method to build Breakdown List Items
-  Widget _buildBreakdownItem(String category, String amount) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            '$category :',
-            style: TextStyle(fontSize: 18),
-          ),
-          Text(
-            amount,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Color _getRandomColor() {
-    final Random random = Random();
-    // Génère une couleur aléatoire
-    return Color.fromARGB(
-      255, // Alpha, valeur fixe pour une opacité maximale
-      random.nextInt(256), // Rouge (0-255)
-      random.nextInt(256), // Vert (0-255)
-      random.nextInt(256), // Bleu (0-255)
-    );
+        const SizedBox(height: 20),
+        Expanded(
+          child: ExpenseListWidget(expenses: outcomeData),
+        )
+      ],
+    ));
   }
 }

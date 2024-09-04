@@ -86,8 +86,7 @@ class _SortPageState extends State<SortPage> {
                 const Text('Enter the name of the new category :'),
                 TextField(
                   controller: _categoryController,
-                  decoration:
-                      const InputDecoration(hintText: "Category name"),
+                  decoration: const InputDecoration(hintText: "Category name"),
                 ),
               ],
             ),
@@ -105,18 +104,18 @@ class _SortPageState extends State<SortPage> {
                 // return input[0].toUpperCase() + input.substring(1).toLowerCase();
                 newCategory = _categoryController.text;
                 if (newCategory!.isNotEmpty) {
-                newCategory = newCategory![0].toUpperCase() + newCategory!.substring(1).toLowerCase();
-                  List<String> list = positive
-                      ? getKeyIncome()
-                      : getKeyOutcome();
-                      print(list.contains(newCategory));
+                  newCategory = newCategory![0].toUpperCase() +
+                      newCategory!.substring(1).toLowerCase();
+                  List<String> list =
+                      positive ? getKeyIncome() : getKeyOutcome();
+                  print(list.contains(newCategory));
                   if (list.contains(newCategory)) {
                     if (positive) {
                       _addToIncome(newCategory!, spent!);
                     } else {
                       _addToOutcome(newCategory!, spent!);
                     }
-                  } else  {
+                  } else {
                     addNewCategory(category: newCategory!, income: positive);
                     if (positive) {
                       _addToIncome(newCategory!, spent!);

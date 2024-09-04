@@ -33,6 +33,7 @@ use flutter_rust_bridge::{Handler, IntoIntoDart};
 use std::collections::VecDeque; 
 use chrono::NaiveDate;
 
+
 // Section: boilerplate
 
 flutter_rust_bridge::frb_generated_boilerplate!(
@@ -41,7 +42,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.2.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -377149759;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1282562522;
 
 // Section: executor
 
@@ -531,6 +532,40 @@ fn wire__crate__api__simple__get_income_data_impl(
         },
     )
 }
+fn wire__crate__api__simple__get_income_data_by_date_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_income_data_by_date",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_month_str = <String>::sse_decode(&mut deserializer);
+            let api_year_str = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok(crate::api::simple::get_income_data_by_date(
+                    &api_month_str,
+                    &api_year_str,
+                ))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 fn wire__crate__api__simple__get_key_income_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -613,6 +648,40 @@ fn wire__crate__api__simple__get_outcome_data_impl(
             deserializer.end();
             transform_result_sse::<_, ()>((move || {
                 let output_ok = Result::<_, ()>::Ok(crate::api::simple::get_outcome_data())?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__simple__get_outcome_data_by_date_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_outcome_data_by_date",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_month_str = <String>::sse_decode(&mut deserializer);
+            let api_year_str = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok(crate::api::simple::get_outcome_data_by_date(
+                    &api_month_str,
+                    &api_year_str,
+                ))?;
                 Ok(output_ok)
             })())
         },
@@ -1106,16 +1175,16 @@ fn pde_ffi_dispatcher_primary_impl(
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
         11 => wire__crate__api__simple__get_formatted_date_impl(port, ptr, rust_vec_len, data_len),
-        16 => wire__crate__api__simple__get_spent_impl(port, ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__simple__initialize_result_with_dummy_data_impl(
+        18 => wire__crate__api__simple__get_spent_impl(port, ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__simple__initialize_result_with_dummy_data_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        20 => wire__crate__api__simple__intialize_impl(port, ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__simple__parse_and_use_date_impl(port, ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__simple__push_transaction_to_result_impl(
+        22 => wire__crate__api__simple__intialize_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__simple__parse_and_use_date_impl(port, ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__simple__push_transaction_to_result_impl(
             port,
             ptr,
             rust_vec_len,
@@ -1164,15 +1233,17 @@ fn pde_ffi_dispatcher_sync_impl(
         9 => wire__crate__api__simple__add_to_outcome_impl(ptr, rust_vec_len, data_len),
         10 => wire__crate__api__simple__debug_result_length_impl(ptr, rust_vec_len, data_len),
         12 => wire__crate__api__simple__get_income_data_impl(ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__simple__get_key_income_impl(ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__simple__get_key_outcome_impl(ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__simple__get_outcome_data_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__simple__get_value_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__simple__init_app_impl(ptr, rust_vec_len, data_len),
-        21 => {
+        13 => wire__crate__api__simple__get_income_data_by_date_impl(ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__simple__get_key_income_impl(ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__simple__get_key_outcome_impl(ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__simple__get_outcome_data_impl(ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__simple__get_outcome_data_by_date_impl(ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__simple__get_value_impl(ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__simple__init_app_impl(ptr, rust_vec_len, data_len),
+        23 => {
             wire__crate__api__simple__load_transactions_from_file_impl(ptr, rust_vec_len, data_len)
         }
-        24 => wire__crate__api__simple__test_impl(ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__simple__test_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

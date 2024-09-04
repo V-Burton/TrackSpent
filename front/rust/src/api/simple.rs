@@ -1,5 +1,5 @@
 use std::collections::{HashMap, VecDeque};
-use chrono::NaiveDate;
+use chrono::{NaiveDate, Datelike};
 use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
 
@@ -231,6 +231,24 @@ pub fn get_income_data() -> HashMap<String, f64> {
     income.iter().map(|(k, v)| (k.clone(), v.iter().map(|spent| spent.amount).sum())).collect()
 }
 
+#[flutter_rust_bridge::frb(sync)]
+pub fn get_outcome_data_by_date(month_str: &str, year_str: &str) -> HashMap<String, f64> {
+    let month: u32 = month_str.parse().expect("Invalid month format");
+    let year: i32 = year_str.parse().expect("Invalid year format");
+
+    let outcome = OUTCOME.lock().unwrap();
+    outcome.iter().map(|(k, v)| (k.clone(), v.iter().filter(|spent| spent.date.month() == month && spent.date.year() == year).map(|spent| spent.amount).sum())).collect()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn get_income_data_by_date(month_str: &str, year_str: &str) -> HashMap<String, f64> {
+    let month: u32 = month_str.parse().expect("Invalid month format");
+    let year: i32 = year_str.parse().expect("Invalid year format");
+
+    let income = INCOME.lock().unwrap();
+    income.iter().map(|(k, v)| (k.clone(), v.iter().filter(|spent| spent.date.month() == month && spent.date.year() == year).map(|spent| spent.amount).sum())).collect()
+}
+
 
 
 //////////////////////////////////
@@ -241,6 +259,7 @@ pub fn initialize_result_with_dummy_data() {
     let mut result = RESULT.lock().unwrap();
 
     let data = vec![
+        ("Test", NaiveDate::from_ymd_opt(2023, 1, 1), -50.25),
         ("Groceries", NaiveDate::from_ymd_opt(2024, 8, 1), -50.25),
         ("Revenue", NaiveDate::from_ymd_opt(2024, 8, 12), 3400.00),
         ("Rent", NaiveDate::from_ymd_opt(2024, 8, 5), -1200.00),

@@ -44,6 +44,7 @@ dependencies:
   rust_lib_front:
     path: rust_builder
   flutter_rust_bridge: 2.2.0
+  carousel_slider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
