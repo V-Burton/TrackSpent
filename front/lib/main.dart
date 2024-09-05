@@ -49,8 +49,8 @@ class _MyAppState extends State<MyApp> {
         ),
         body: [
           const SortPage(),
-          OutcomePage(),
-          IncomePage(),
+          const OutcomePage(),
+          const IncomePage(),
         ][_currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _currentIndex,
@@ -61,7 +61,6 @@ class _MyAppState extends State<MyApp> {
             BottomNavigationBarItem(
               icon: SizedBox.shrink(),
               label: "Sort"
-
             ),
             BottomNavigationBarItem(
               icon: SizedBox.shrink(),

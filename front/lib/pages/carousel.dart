@@ -6,8 +6,12 @@ class CarouselWidget extends StatefulWidget {
   final Function(String) onItemSelected;
   final int initialIndex;
 
-  const CarouselWidget(
-      {super.key, required this.items, required this.onItemSelected, required this.initialIndex});
+  const CarouselWidget({
+    super.key, 
+    required this.items, 
+    required this.onItemSelected, 
+    this.initialIndex = 0
+  });
 
   @override
   _CarouselWidgetState createState() => _CarouselWidgetState();
@@ -16,6 +20,7 @@ class CarouselWidget extends StatefulWidget {
 class _CarouselWidgetState extends State<CarouselWidget> {
   late int _currentIndex;
 
+  @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
@@ -30,6 +35,7 @@ class _CarouselWidgetState extends State<CarouselWidget> {
             height: 32.0,
             autoPlay: false,
             enlargeCenterPage: true,
+            initialPage: _currentIndex,
             onPageChanged: (index, reason) {
               setState(() {
                 _currentIndex = index;
