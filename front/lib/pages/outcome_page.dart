@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:front/src/rust/api/simple.dart';
-import 'piechart.dart';
 import 'carousel.dart';
-import 'expense_list.dart';
+import 'update_data.dart';
 
 class OutcomePage extends StatefulWidget {
   const OutcomePage({Key? key}) : super(key: key);
@@ -44,9 +42,10 @@ class _OutcomePageState extends State<OutcomePage> {
         const SizedBox(height: 20),
         // Charge uniquement les données dynamiques (pie chart + liste de dépenses)
         Expanded(
-          child: OutcomeDataWidget(
+          child: UpdateDataWidget(
             month: selectedMonth,
             year: selectedYear,
+            positive: false,
           ),
         ),
       ],
@@ -93,62 +92,62 @@ class _OutcomePageState extends State<OutcomePage> {
   }
 }
 
-class OutcomeDataWidget extends StatefulWidget {
-  final int month;
-  final int year;
+// class OutcomeDataWidget extends StatefulWidget {
+//   final int month;
+//   final int year;
 
-  const OutcomeDataWidget({super.key, required this.month, required this.year });
+//   const OutcomeDataWidget({super.key, required this.month, required this.year });
 
-  @override
-  _OutcomeDataWidgetState createState() => _OutcomeDataWidgetState();
-}
+//   @override
+//   _OutcomeDataWidgetState createState() => _OutcomeDataWidgetState();
+// }
 
-class _OutcomeDataWidgetState extends State<OutcomeDataWidget> {
-  late Future<Map<String, double>> _getOutcomeData;
+// class _OutcomeDataWidgetState extends State<OutcomeDataWidget> {
+//   late Future<Map<String, double>> _getOutcomeData;
 
-  @override
-  void initState(){
-    super.initState();
-    _fetchOutcomeData();
-  }
+//   @override
+//   void initState(){
+//     super.initState();
+//     _fetchOutcomeData();
+//   }
 
-@override
-void didUpdateWidget(covariant OutcomeDataWidget oldWidget) {
-  super.didUpdateWidget(oldWidget);
-  if (widget.month != oldWidget.month || widget.year != oldWidget.year) {
-    _fetchOutcomeData();
-  }
-  }
+// @override
+// void didUpdateWidget(covariant OutcomeDataWidget oldWidget) {
+//   super.didUpdateWidget(oldWidget);
+//   if (widget.month != oldWidget.month || widget.year != oldWidget.year) {
+//     _fetchOutcomeData();
+//   }
+//   }
   
-  void _fetchOutcomeData() {
-    setState(() {
-      _getOutcomeData = getOutcomeDataByDate(month: widget.month, year: widget.year);
-    });
-  }
+//   void _fetchOutcomeData() {
+//     setState(() {
+//       _getOutcomeData = getOutcomeDataByDate(month: widget.month, year: widget.year);
+//     });
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Map<String, double>>(
-      future: _getOutcomeData,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (snapshot.hasData) {
-            Map<String, double> outcomeData = snapshot.data!;
-            return Column(
-              children: [
-                PieChartWidget(data: outcomeData),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ExpenseListWidget(expenses: outcomeData),
-                ),
-              ],
-            );
-          } else {
-            return const Center(child: Text('No data available'));
-          }
-        });
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return FutureBuilder<Map<String, double>>(
+//       future: _getOutcomeData,
+//       builder: (context, snapshot) {
+//         if (snapshot.connectionState == ConnectionState.waiting) {
+//             return const Center(child: CircularProgressIndicator());
+//           } else if (snapshot.hasError) {
+//             return Center(child: Text('Error: ${snapshot.error}'));
+//           } else if (snapshot.hasData) {
+//             Map<String, double> outcomeData = snapshot.data!;
+//             return Column(
+//               children: [
+//                 PieChartWidget(data: outcomeData),
+//                 const SizedBox(height: 20),
+//                 Expanded(
+//                   child: ExpenseListWidget(expenses: outcomeData),
+//                 ),
+//               ],
+//             );
+//           } else {
+//             return const Center(child: Text('No data available'));
+//           }
+//         });
+//   }
+// }

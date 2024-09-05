@@ -1,136 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:front/src/rust/api/simple.dart';
-import 'dart:math';
+import 'carousel.dart';
+import 'update_data.dart';
 
 class IncomePage extends StatefulWidget {
   const IncomePage({Key? key}) : super(key: key);
+
   @override
-  State<IncomePage> createState() => _IncomePageState();
+  _IncomePageState createState() => _IncomePageState();
 }
 
 class _IncomePageState extends State<IncomePage> {
-  late Future<Map<String, double>> _getIncomeData;
-
-  @override
-  void initState() {
-    super.initState();
-    _getIncomeData = loadGetIncomeData();
-  }
-
-  Future<Map<String, double>> loadGetIncomeData() async {
-    return await getIncomeData();
-  }
+  int selectedMonth = DateTime.now().month; // Mois sélectionné par défaut
+  int selectedYear = DateTime.now().year; // Année sélectionnée par défaut
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FutureBuilder<Map<String, double>>(
-          future:
-              _getIncomeData, // Appel à la fonction Rust pour récupérer les données
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return Center(child: Text('No data available'));
-            } else {
-              final data = snapshot.data!;
-              final totalAmount =
-                  data.values.fold(0.0, (sum, value) => sum + value);
-              return Column(
-                children: [
-                  // Circular Chart with Total Amount
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        // Circular Pie Chart
-                        SizedBox(
-                          width: 200,
-                          height: 200,
-                          child: PieChart(
-                            PieChartData(
-                              sections: _buildPieChartSections(data),
-                              centerSpaceRadius: 60,
-                            ),
-                          ),
-                        ),
-                        // Total Amount Text
-                        Text(
-                          '${totalAmount.toStringAsFixed(2)}€',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: 40),
-
-                  // Breakdown List
-                  Expanded(
-                    child: ListView(
-                      children: data.entries.map((entry) {
-                        return _buildBreakdownItem(
-                            entry.key, '${entry.value.toStringAsFixed(2)}€');
-                      }).toList(),
-                    ),
-                  ),
-                ],
-              );
-            }
+        body: Column(
+      children: [
+        // Carrousel pour les années
+        CarouselWidget(
+          items: "2023 2024".split(" "),
+          initialIndex: yearToIndex(selectedYear), // Initialise à l'année actuelle
+          onItemSelected: (selected) {
+            setState(() {
+              selectedYear = int.parse(selected);
+            });
           },
         ),
-      ),
-    );
-  }
-
-  // Helper method to build Pie Chart Sections
-  List<PieChartSectionData> _buildPieChartSections(Map<String, double> data) {
-    return data.entries.map((entry) {
-      return PieChartSectionData(
-        color: _getRandomColor(),
-        value: entry.value,
-        title: entry.key,
-        radius: 40,
-        titleStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-      );
-    }).toList();
-  }
-
-  // Helper method to build Breakdown List Items
-  Widget _buildBreakdownItem(String category, String amount) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            '$category :',
-            style: TextStyle(fontSize: 18),
+        // Carrousel pour les mois
+        CarouselWidget(
+          items: "January February March April May June July August September October November December"
+              .split(" "),
+          initialIndex: monthToIndex(selectedMonth), // Initialise à la sélection du mois actuel
+          onItemSelected: (selected) {
+            setState(() {
+              selectedMonth = monthToInt(selected);
+            });
+          },
+        ),
+        const SizedBox(height: 20),
+        // Charge uniquement les données dynamiques (pie chart + liste de dépenses)
+        Expanded(
+          child: UpdateDataWidget(
+            month: selectedMonth,
+            year: selectedYear,
+            positive: true,
           ),
-          Text(
-            amount,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
+        ),
+      ],
+    ));
   }
 
-  Color _getRandomColor() {
-    final Random random = Random();
-    // Génère une couleur aléatoire
-    return Color.fromARGB(
-      255, // Alpha, valeur fixe pour une opacité maximale
-      random.nextInt(256), // Rouge (0-255)
-      random.nextInt(256), // Vert (0-255)
-      random.nextInt(256), // Bleu (0-255)
-    );
+  int monthToInt(String month) {
+    switch (month) {
+      case "January":
+        return 1;
+      case "February":
+        return 2;
+      case "March":
+        return 3;
+      case "April":
+        return 4;
+      case "May":
+        return 5;
+      case "June":
+        return 6;
+      case "July":
+        return 7;
+      case "August":
+        return 8;
+      case "September":
+        return 9;
+      case "October":
+        return 10;
+      case "November":
+        return 11;
+      case "December":
+        return 12;
+      default:
+        return 0;
+    }
+  }
+
+  int monthToIndex(int month) {
+    return month - 1; // Index des mois commençant à 0
+  }
+
+  int yearToIndex(int year) {
+    return year == 2023 ? 0 : 1; // Index des années, ajustez selon vos besoins
   }
 }
