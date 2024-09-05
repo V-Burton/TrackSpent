@@ -68,3 +68,42 @@ void didUpdateWidget(covariant UpdateDataWidget oldWidget) {
         });
   }
 }
+
+int monthToInt(String month) {
+  switch (month) {
+    case "January":
+      return 1;
+    case "February":
+      return 2;
+    case "March":
+      return 3;
+    case "April":
+      return 4;
+    case "May":
+      return 5;
+    case "June":
+      return 6;
+    case "July":
+      return 7;
+    case "August":
+      return 8;
+    case "September":
+      return 9;
+    case "October":
+      return 10;
+    case "November":
+      return 11;
+    case "December":
+      return 12;
+    default:
+      return 0;
+  }
+}
+
+int monthToIndex(int month) {
+  return month - 1; // Index des mois commençant à 0
+}
+
+int yearToIndex(int year) {
+  return year == 2023 ? 0 : 1; // Index des années, ajustez selon vos besoins
+}

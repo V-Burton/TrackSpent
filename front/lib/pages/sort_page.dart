@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:front/src/rust/api/simple.dart';
-import 'package:front/src/rust/frb_generated.dart';
 import 'package:intl/intl.dart';
 
 class SortPage extends StatefulWidget {
