@@ -4,16 +4,22 @@ import 'package:carousel_slider/carousel_slider.dart';
 class CarouselWidget extends StatefulWidget {
   final List<String> items;
   final Function(String) onItemSelected;
+  final int initialIndex;
 
   const CarouselWidget(
-      {super.key, required this.items, required this.onItemSelected});
+      {super.key, required this.items, required this.onItemSelected, required this.initialIndex});
 
   @override
   _CarouselWidgetState createState() => _CarouselWidgetState();
 }
 
 class _CarouselWidgetState extends State<CarouselWidget> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -61,15 +61,17 @@ Map<String, double> getOutcomeData() =>
 Map<String, double> getIncomeData() =>
     RustLib.instance.api.crateApiSimpleGetIncomeData();
 
-Map<String, double> getOutcomeDataByDate(
-        {required String monthStr, required String yearStr}) =>
-    RustLib.instance.api.crateApiSimpleGetOutcomeDataByDate(
-        monthStr: monthStr, yearStr: yearStr);
+Future<Map<String, double>> getOutcomeDataByDate(
+        {required int month, required int year}) async {
+          return await RustLib.instance.api
+        .crateApiSimpleGetOutcomeDataByDate(month: month, year: year);
+
+        }
 
 Map<String, double> getIncomeDataByDate(
-        {required String monthStr, required String yearStr}) =>
-    RustLib.instance.api.crateApiSimpleGetIncomeDataByDate(
-        monthStr: monthStr, yearStr: yearStr);
+        {required int month, required int year}) =>
+    RustLib.instance.api
+        .crateApiSimpleGetIncomeDataByDate(month: month, year: year);
 
 ///
 ///

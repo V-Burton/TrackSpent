@@ -232,19 +232,13 @@ pub fn get_income_data() -> HashMap<String, f64> {
 }
 
 #[flutter_rust_bridge::frb(sync)]
-pub fn get_outcome_data_by_date(month_str: &str, year_str: &str) -> HashMap<String, f64> {
-    let month: u32 = month_str.parse().expect("Invalid month format");
-    let year: i32 = year_str.parse().expect("Invalid year format");
-
+pub fn get_outcome_data_by_date(month: u32, year: i32) -> HashMap<String, f64> {
     let outcome = OUTCOME.lock().unwrap();
     outcome.iter().map(|(k, v)| (k.clone(), v.iter().filter(|spent| spent.date.month() == month && spent.date.year() == year).map(|spent| spent.amount).sum())).collect()
 }
 
 #[flutter_rust_bridge::frb(sync)]
-pub fn get_income_data_by_date(month_str: &str, year_str: &str) -> HashMap<String, f64> {
-    let month: u32 = month_str.parse().expect("Invalid month format");
-    let year: i32 = year_str.parse().expect("Invalid year format");
-
+pub fn get_income_data_by_date(month: u32, year: i32) -> HashMap<String, f64> {
     let income = INCOME.lock().unwrap();
     income.iter().map(|(k, v)| (k.clone(), v.iter().filter(|spent| spent.date.month() == month && spent.date.year() == year).map(|spent| spent.amount).sum())).collect()
 }

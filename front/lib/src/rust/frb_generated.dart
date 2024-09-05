@@ -99,7 +99,7 @@ abstract class RustLibApi extends BaseApi {
   Map<String, double> crateApiSimpleGetIncomeData();
 
   Map<String, double> crateApiSimpleGetIncomeDataByDate(
-      {required String monthStr, required String yearStr});
+      {required int month, required int year});
 
   List<String> crateApiSimpleGetKeyIncome();
 
@@ -108,7 +108,7 @@ abstract class RustLibApi extends BaseApi {
   Map<String, double> crateApiSimpleGetOutcomeData();
 
   Map<String, double> crateApiSimpleGetOutcomeDataByDate(
-      {required String monthStr, required String yearStr});
+      {required int month, required int year});
 
   Future<Spent?> crateApiSimpleGetSpent();
 
@@ -471,12 +471,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Map<String, double> crateApiSimpleGetIncomeDataByDate(
-      {required String monthStr, required String yearStr}) {
+      {required int month, required int year}) {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(monthStr, serializer);
-        sse_encode_String(yearStr, serializer);
+        sse_encode_u_32(month, serializer);
+        sse_encode_i_32(year, serializer);
         return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 13)!;
       },
       codec: SseCodec(
@@ -484,7 +484,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: null,
       ),
       constMeta: kCrateApiSimpleGetIncomeDataByDateConstMeta,
-      argValues: [monthStr, yearStr],
+      argValues: [month, year],
       apiImpl: this,
     ));
   }
@@ -492,7 +492,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiSimpleGetIncomeDataByDateConstMeta =>
       const TaskConstMeta(
         debugName: "get_income_data_by_date",
-        argNames: ["monthStr", "yearStr"],
+        argNames: ["month", "year"],
       );
 
   @override
@@ -565,12 +565,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Map<String, double> crateApiSimpleGetOutcomeDataByDate(
-      {required String monthStr, required String yearStr}) {
+      {required int month, required int year}) {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
-        sse_encode_String(monthStr, serializer);
-        sse_encode_String(yearStr, serializer);
+        sse_encode_u_32(month, serializer);
+        sse_encode_i_32(year, serializer);
         return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 17)!;
       },
       codec: SseCodec(
@@ -578,7 +578,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         decodeErrorData: null,
       ),
       constMeta: kCrateApiSimpleGetOutcomeDataByDateConstMeta,
-      argValues: [monthStr, yearStr],
+      argValues: [month, year],
       apiImpl: this,
     ));
   }
@@ -586,7 +586,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiSimpleGetOutcomeDataByDateConstMeta =>
       const TaskConstMeta(
         debugName: "get_outcome_data_by_date",
-        argNames: ["monthStr", "yearStr"],
+        argNames: ["month", "year"],
       );
 
   @override
@@ -923,6 +923,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int dco_decode_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
   List<String> dco_decode_list_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_String).toList();
@@ -962,6 +968,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       dco_decode_String(arr[0]),
       dco_decode_f_64(arr[1]),
     );
+  }
+
+  @protected
+  int dco_decode_u_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
   }
 
   @protected
@@ -1090,6 +1102,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int sse_decode_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getInt32();
+  }
+
+  @protected
   List<String> sse_decode_list_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -1144,6 +1162,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  int sse_decode_u_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getUint32();
+  }
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint8();
@@ -1158,12 +1182,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   BigInt sse_decode_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getBigUint64();
-  }
-
-  @protected
-  int sse_decode_i_32(SseDeserializer deserializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt32();
   }
 
   @protected
@@ -1276,6 +1294,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_i_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putInt32(self);
+  }
+
+  @protected
   void sse_encode_list_String(List<String> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
@@ -1324,6 +1348,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_u_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putUint32(self);
+  }
+
+  @protected
   void sse_encode_u_8(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self);
@@ -1338,12 +1368,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putBigUint64(self);
-  }
-
-  @protected
-  void sse_encode_i_32(int self, SseSerializer serializer) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt32(self);
   }
 }
 
