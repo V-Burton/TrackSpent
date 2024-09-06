@@ -67,6 +67,7 @@ lazy_static! {
     static ref OUTCOME: std::sync::Mutex<HashMap<String, Vec<Spent>>> = std::sync::Mutex::new(HashMap::new());
     static ref INCOME: std::sync::Mutex<HashMap<String, Vec<Spent>>> = std::sync::Mutex::new(HashMap::new());
     static ref RESULT: std::sync::Mutex<VecDeque<Spent>> = std::sync::Mutex::new(VecDeque::new());
+    //To Do had list for Outcome and Income so the buttons always diosplay in the same order
 }
 
 pub fn get_formatted_date(date: NaiveDate) -> String {

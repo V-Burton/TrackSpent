@@ -284,6 +284,7 @@ class AddNewCategoryButton extends StatelessWidget {
                       addToOutcome(category: newCategory, spent: spent);
                     }
                   }
+                  onCategoryAdded();
                   Navigator.of(context).pop(); // Ferme le pop-up après validation
                 } else {
                   print('Category name is empty');
