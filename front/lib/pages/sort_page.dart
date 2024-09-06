@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:front/src/rust/api/simple.dart';
-import 'package:intl/intl.dart';
 
 class SortPage extends StatefulWidget {
   const SortPage({super.key});
@@ -10,38 +10,163 @@ class SortPage extends StatefulWidget {
 }
 
 class _SortPageState extends State<SortPage> {
-  late Future<Spent?> _futureSpent;
-  late Future<List<String>> _futureKeysIncome;
-  late Future<List<String>> _futureKeysOutcome;
-  Spent? spent;
+  Future<Spent?>? _futureSpent;
   bool positive = true;
 
-  final TextEditingController _categoryController = TextEditingController();
-
-  @override
   void initState() {
     super.initState();
-    _futureSpent = _loadSpent();
-    _futureKeysIncome = getKeysIncome();
-    _futureKeysOutcome = getKeysOutcome();
+    _loadNewSpent();
   }
 
-  Future<Spent?> _loadSpent() async {
-    try {
-      final spent = await getSpent(); // Appelle la fonction Rust
-      if (spent != null) {
-        setState(() {
-          positive = spent.amount > 0;
-          if (positive) {
-            _futureKeysIncome = getKeysIncome();
-          } else {
-            _futureKeysOutcome = getKeysOutcome();
-          }
-        });
+  void _loadNewSpent() async {
+    setState(() {
+      _futureSpent = getSpent(); // Charge un nouveau Spent
+    });
+  }
+
+  void _onCategoryAdded() {
+    _loadNewSpent();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FutureBuilder<Spent?>(
+            future: _futureSpent,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator(); // Affichage d'un loader pendant le chargement
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              } else if (!snapshot.hasData || snapshot.data == null) {
+                return const Text('No more Spent to categorize');
+              } else {
+                final spent = snapshot.data!;
+                positive = spent.amount > 0;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SortInfoBox(
+                      spent: spent,
+                      onSpentLoaded: _onCategoryAdded,
+                    ), // Affichage des informations
+                    const SizedBox(height: 20),
+                    SortCategoryButtons(
+                      positive: positive,
+                      spent: spent,
+                      onCategoryAdded: _onCategoryAdded, // Recharge après interaction
+                    ),
+                    const SizedBox(height: 20),
+                    AddNewCategoryButton(
+                      positive: positive,
+                      spent: spent,
+                      onCategoryAdded: _onCategoryAdded,
+                    )
+                  ],
+                );
+              }
+            },
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+}
+
+
+/////////////////////////////////////////////////////
+/// InfoBox /////////////////////////////////////////
+/////////////////////////////////////////////////////
+class SortInfoBox extends StatelessWidget {
+  final Spent spent;
+  final Function() onSpentLoaded;
+
+  const SortInfoBox({
+    super.key,
+    required this.spent,
+    required this.onSpentLoaded,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.black),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        children: [
+          Text(spent.reason, style: const TextStyle(fontSize: 16)),
+          const SizedBox(height: 8),
+          Text('${spent.amount}€',
+              style: const TextStyle(
+                  fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          FutureBuilder<String?>(
+            future: getFormattedDate(date: spent.date),
+            builder: (context, dateSnapshot) {
+              if (dateSnapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (dateSnapshot.hasError) {
+                return Text('Error: ${dateSnapshot.error}');
+              } else if (dateSnapshot.hasData) {
+                return Text(
+                  dateSnapshot.data!,
+                  style: const TextStyle(fontSize: 16),
+                );
+              } else {
+                return const Text('Date not available');
+              }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/////////////////////////////////////////////////////
+/// SortCategoryButtons /////////////////////////////
+/////////////////////////////////////////////////////
+
+class SortCategoryButtons extends StatelessWidget {
+  final bool positive;
+  final Spent? spent; // Ajout de Spent
+  final Function onCategoryAdded;
+
+  const SortCategoryButtons({
+    super.key,
+    required this.positive,
+    required this.spent, // Reçoit le Spent
+    required this.onCategoryAdded,
+  });
+
+  Future<void> _addToIncome(String category) async {
+    if (spent != null) {
+      try {
+        addToIncome(category: category, spent: spent!);
+        onCategoryAdded();
+      } catch (e) {
+        print('Failed to add to income category: $e');
       }
-      return spent;
-    } catch (e) {
-      return null; // Retourne null en cas d'erreur
+    }
+  }
+
+  Future<void> _addToOutcome(String category) async {
+    if (spent != null) {
+      try {
+        addToOutcome(category: category, spent: spent!);
+        onCategoryAdded();
+      } catch (e) {
+        print('Failed to add to outcome category: $e');
+      }
     }
   }
 
@@ -53,24 +178,64 @@ class _SortPageState extends State<SortPage> {
     return getKeyOutcome();
   }
 
-  Future<void> _addToIncome(String category, Spent spent) async {
-    try {
-      addToIncome(category: category, spent: spent);
-    } catch (e) {
-      print('Failed to add spent to income category: $e');
-    }
-  }
+  @override
+  Widget build(BuildContext context) {
+    final futureKeys = positive ? getKeysIncome() : getKeysOutcome();
 
-  Future<void> _addToOutcome(String category, Spent spent) async {
-    try {
-      addToOutcome(category: category, spent: spent);
-    } catch (e) {
-      print('Failed to add spent to income category: $e');
-    }
+    return FutureBuilder<List<String>>(
+      future: futureKeys,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}');
+        } else if (snapshot.hasData) {
+          final keys = snapshot.data!;
+          return Wrap(
+            spacing: 20,
+            runSpacing: 20,
+            children: keys.map((key) {
+              return ElevatedButton(
+                onPressed: () {
+                  if (positive) {
+                    _addToIncome(key);
+                  } else {
+                    _addToOutcome(key);
+                  }
+                },
+                style: ElevatedButton.styleFrom(fixedSize: const Size(100, 100)),
+                child: Text(key),
+              );
+            }).toList(),
+          );
+        } else {
+          return const Text('No data');
+        }
+      },
+    );
   }
+}
 
-  Future<void> _showAddCategoryDialog(BuildContext context) async {
-    String? newCategory;
+/////////////////////////////////////////////////////
+/// AddNewCategoryButton ////////////////////////////
+/////////////////////////////////////////////////////
+
+class AddNewCategoryButton extends StatelessWidget {
+  final bool positive;
+  final Spent? spent;
+  final Function onCategoryAdded;
+
+  const AddNewCategoryButton({
+    super.key,
+    required this.positive,
+    required this.spent,
+    required this.onCategoryAdded,
+  });
+
+  Future<void> showAddCategoryDialog(
+      BuildContext context, bool positive, Spent spent) {
+    final TextEditingController _categoryController =
+        TextEditingController();
 
     return showDialog<void>(
       context: context,
@@ -82,7 +247,7 @@ class _SortPageState extends State<SortPage> {
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                const Text('Enter the name of the new category :'),
+                const Text('Enter the name of the new category:'),
                 TextField(
                   controller: _categoryController,
                   decoration: const InputDecoration(hintText: "Category name"),
@@ -100,36 +265,28 @@ class _SortPageState extends State<SortPage> {
             ElevatedButton(
               child: const Text('Validate'),
               onPressed: () {
-                // return input[0].toUpperCase() + input.substring(1).toLowerCase();
-                newCategory = _categoryController.text;
-                if (newCategory!.isNotEmpty) {
-                  newCategory = newCategory![0].toUpperCase() +
-                      newCategory!.substring(1).toLowerCase();
+                final newCategory =
+                    _formatCategory(_categoryController.text);
+                if (newCategory.isNotEmpty) {
                   List<String> list =
                       positive ? getKeyIncome() : getKeyOutcome();
-                  print(list.contains(newCategory));
                   if (list.contains(newCategory)) {
                     if (positive) {
-                      _addToIncome(newCategory!, spent!);
+                      addToIncome(category: newCategory, spent: spent);
                     } else {
-                      _addToOutcome(newCategory!, spent!);
+                      addToOutcome(category: newCategory, spent: spent);
                     }
                   } else {
-                    addNewCategory(category: newCategory!, income: positive);
+                    addNewCategory(category: newCategory, income: positive);
                     if (positive) {
-                      _addToIncome(newCategory!, spent!);
-                      _futureKeysIncome = getKeysIncome();
+                      addToIncome(category: newCategory, spent: spent);
                     } else {
-                      _addToOutcome(newCategory!, spent!);
-                      _futureKeysOutcome = getKeysOutcome();
+                      addToOutcome(category: newCategory, spent: spent);
                     }
                   }
-                  setState(() {
-                    _futureSpent = _loadSpent();
-                  });
-                  Navigator.of(context).pop(); // Ferme le pop-up
+                  Navigator.of(context).pop(); // Ferme le pop-up après validation
                 } else {
-                  print('Nom de catégorie vide');
+                  print('Category name is empty');
                 }
               },
             ),
@@ -139,127 +296,24 @@ class _SortPageState extends State<SortPage> {
     );
   }
 
+  String _formatCategory(String category) {
+    return category.isNotEmpty
+        ? category[0].toUpperCase() + category.substring(1).toLowerCase()
+        : '';
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Information Box
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.black),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FutureBuilder<Spent?>(
-                  future: _futureSpent,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (!snapshot.hasData || snapshot.data == null) {
-                      return const Text('No more Spent to categorize');
-                    } else {
-                      spent = snapshot.data!;
-                      if (spent!.amount > 0) {
-                        positive = true;
-                      } else {
-                        positive = false;
-                      }
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(spent!.reason,
-                              style: const TextStyle(fontSize: 16)),
-                          const SizedBox(height: 8),
-                          Text('${spent!.amount}€',
-                              style: const TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          FutureBuilder<String?>(
-                            future: getFormattedDate(date: spent!.date),
-                            builder: (context, dateSnapshot) {
-                              if (dateSnapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (dateSnapshot.hasError) {
-                                return Text('Error: ${dateSnapshot.error}');
-                              } else if (dateSnapshot.hasData) {
-                                return Text(
-                                    DateFormat('dd/MM/yyyy').format(
-                                        DateTime.parse(dateSnapshot.data!)),
-                                    style: const TextStyle(fontSize: 16));
-                              } else {
-                                return const Text('Date not available');
-                              }
-                            },
-                          ),
-                        ],
-                      );
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          // FutureBuilder for dynamic buttons
-          FutureBuilder<List<String>>(
-            future: positive ? _futureKeysIncome : _futureKeysOutcome,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator(); // Display a loading indicator while waiting
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else if (snapshot.hasData) {
-                // Create buttons dynamically based on the keys
-                return Wrap(
-                  spacing: 20,
-                  runSpacing: 20,
-                  children: snapshot.data!.map((key) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        if (positive) {
-                          _addToIncome(key, spent!);
-                        } else {
-                          _addToOutcome(key, spent!);
-                        }
-                        setState(() {
-                          _futureSpent = _loadSpent();
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        fixedSize: const Size(100, 100),
-                      ),
-                      child: Text(key),
-                    );
-                  }).toList(),
-                );
-              } else {
-                return const Text('No data');
-              }
-            },
-          ),
-          const SizedBox(height: 20),
-
-          ElevatedButton(
-            onPressed: () {
-              _showAddCategoryDialog(context);
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(16.0),
-            ),
-            child: const Text('Add a Category'),
-          ),
-        ],
+    return ElevatedButton(
+      onPressed: spent != null
+          ? () async {
+              await showAddCategoryDialog(context, positive, spent!);
+            }
+          : null,
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.all(16.0),
       ),
+      child: const Text('Add a Category'),
     );
   }
 }
