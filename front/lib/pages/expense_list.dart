@@ -7,16 +7,22 @@ class ExpenseListWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<MapEntry<String, double>> sortedExpenses = _sortExpenses(expenses);
     return Expanded(
       child: ListView.builder(
-        itemCount: expenses.length,
+        itemCount: sortedExpenses.length,
         itemBuilder: (context, index) {
-          String category = expenses.keys.elementAt(index);
-          double amount = expenses[category]!;
+          String category = sortedExpenses[index].key;
+          double amount = sortedExpenses[index].value;
           return _buildBreakDownItem(category, amount);
         },
       ),
     );
+  }
+
+  List<MapEntry<String, double>> _sortExpenses(Map<String, double> expenses) {
+    return expenses.entries.toList()
+      ..sort((a, b) => a.value.compareTo(b.value));  // Tri par montant décroissant
   }
 
   Widget _buildBreakDownItem(String category, double amount) {
@@ -27,11 +33,11 @@ class ExpenseListWidget extends StatelessWidget {
         children: [
           Text(
             '$category :',
-            style: TextStyle(fontSize: 18),
+            style: const TextStyle(fontSize: 18),
           ),
           Text(
             '${amount.toStringAsFixed(2)}€',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
         ],
       ),
