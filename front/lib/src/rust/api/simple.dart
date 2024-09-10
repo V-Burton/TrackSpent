@@ -8,8 +8,8 @@ import '../lib.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `remove_spent`
-// These types are ignored because they are not used by any `pub` functions: `Amount`, `Dates`, `Descriptions`, `INCOME`, `OUTCOME`, `RESULT`, `Transaction`, `Types`, `ValueDetail`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `deref`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `initialize`, `initialize`, `initialize`
+// These types are ignored because they are not used by any `pub` functions: `Amount`, `Dates`, `Descriptions`, `INCOME`, `KEY_INCOME`, `KEY_OUTCOME`, `OUTCOME`, `RESULT`, `Transaction`, `Types`, `ValueDetail`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `deref`, `deref`, `deref`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`
 
 Future<String> getFormattedDate({required NaiveDate date}) =>
     RustLib.instance.api.crateApiSimpleGetFormattedDate(date: date);
@@ -17,11 +17,11 @@ Future<String> getFormattedDate({required NaiveDate date}) =>
 Future<void> parseAndUseDate({required String dateStr}) =>
     RustLib.instance.api.crateApiSimpleParseAndUseDate(dateStr: dateStr);
 
-List<String> getKeyOutcome() =>
-    RustLib.instance.api.crateApiSimpleGetKeyOutcome();
-
 List<String> getKeyIncome() =>
     RustLib.instance.api.crateApiSimpleGetKeyIncome();
+
+List<String> getKeyOutcome() =>
+    RustLib.instance.api.crateApiSimpleGetKeyOutcome();
 
 void initApp() => RustLib.instance.api.crateApiSimpleInitApp();
 
@@ -38,9 +38,6 @@ Future<Spent?> getSpent() => RustLib.instance.api.crateApiSimpleGetSpent();
 String getValue({required BigInt indice}) =>
     RustLib.instance.api.crateApiSimpleGetValue(indice: indice);
 
-BigInt debugResultLength() =>
-    RustLib.instance.api.crateApiSimpleDebugResultLength();
-
 void addToIncome({required String category, required Spent spent}) =>
     RustLib.instance.api
         .crateApiSimpleAddToIncome(category: category, spent: spent);
@@ -52,14 +49,6 @@ void addToOutcome({required String category, required Spent spent}) =>
 void addNewCategory({required String category, required bool income}) =>
     RustLib.instance.api
         .crateApiSimpleAddNewCategory(category: category, income: income);
-
-String test() => RustLib.instance.api.crateApiSimpleTest();
-
-Map<String, double> getOutcomeData() =>
-    RustLib.instance.api.crateApiSimpleGetOutcomeData();
-
-Map<String, double> getIncomeData() =>
-    RustLib.instance.api.crateApiSimpleGetIncomeData();
 
 Future<Map<String, double>> getOutcomeDataByDate(
         {required int month, required int year}) async {

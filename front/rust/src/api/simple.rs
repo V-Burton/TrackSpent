@@ -2,6 +2,7 @@ use std::collections::{HashMap, VecDeque};
 use chrono::{NaiveDate, Datelike};
 use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
+use std::vec;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Transaction {
@@ -68,6 +69,8 @@ lazy_static! {
     static ref INCOME: std::sync::Mutex<HashMap<String, Vec<Spent>>> = std::sync::Mutex::new(HashMap::new());
     static ref RESULT: std::sync::Mutex<VecDeque<Spent>> = std::sync::Mutex::new(VecDeque::new());
     //To Do had list for Outcome and Income so the buttons always diosplay in the same order
+    static ref KEY_INCOME: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+    static ref KEY_OUTCOME: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
 }
 
 pub fn get_formatted_date(date: NaiveDate) -> String {
@@ -82,16 +85,17 @@ pub fn parse_and_use_date(date_str: String) -> Result<(), String> {
 }
 
 #[flutter_rust_bridge::frb(sync)]
-pub fn get_key_outcome() -> Vec<String> {
-    let outcome = OUTCOME.lock().unwrap();
-    outcome.keys().cloned().collect()
+pub fn get_key_income() -> Vec<String> {
+    let income = KEY_INCOME.lock().unwrap();
+    income.to_vec()
 }
 
 #[flutter_rust_bridge::frb(sync)]
-pub fn get_key_income() -> Vec<String> {
-    let income = INCOME.lock().unwrap();
-    income.keys().cloned().collect()
+pub fn get_key_outcome() -> Vec<String> {
+    let outcome = KEY_OUTCOME.lock().unwrap();
+    outcome.to_vec()
 }
+
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn init_app() {
@@ -102,16 +106,27 @@ pub fn init_app() {
 pub fn intialize() {
     let mut outcome = OUTCOME.lock().unwrap();
     let mut income = INCOME.lock().unwrap();
+    let mut keyIncome = KEY_INCOME.lock().unwrap();
+    let mut keyOutcome = KEY_OUTCOME.lock().unwrap();
 
     outcome.insert("Charges".to_string(), Vec::new());
     outcome.insert("Food".to_string(), Vec::new());
     outcome.insert("Save".to_string(), Vec::new());
     outcome.insert("Other".to_string(), Vec::new());
+    keyOutcome.push("Charges".to_string());
+    keyOutcome.push("Food".to_string());
+    keyOutcome.push("Save".to_string());
+    keyOutcome.push("Other".to_string());
 
     income.insert("Revenu".to_string(), Vec::new());
     income.insert("Refund".to_string(), Vec::new());
     income.insert("Gift".to_string(), Vec::new());
     income.insert("Other".to_string(), Vec::new());
+    keyIncome.push("Revenu".to_string());
+    keyIncome.push("Refund".to_string());
+    keyIncome.push("Gift".to_string());
+    keyIncome.push("Other".to_string());
+
 }
 
 #[flutter_rust_bridge::frb(sync)]
@@ -170,12 +185,6 @@ pub fn get_value(indice: usize) -> String {
 }
 
 #[flutter_rust_bridge::frb(sync)]
-pub fn debug_result_length() -> usize {
-    let result = RESULT.lock().unwrap();
-    result.len()
-}
-
-#[flutter_rust_bridge::frb(sync)]
 pub fn add_to_income(category: &str, spent: Spent) {
     let mut income = INCOME.lock().unwrap();
     let category_spent = income.get_mut(category).unwrap();
@@ -195,41 +204,15 @@ pub fn add_to_outcome(category: &str, spent: Spent) {
 pub fn add_new_category(category: &str, income: bool) {
     if income {
         let mut income = INCOME.lock().unwrap();
+        let mut key_income = KEY_INCOME.lock().unwrap(); 
         income.insert(category.to_string(), Vec::new());
+        key_income.push(category.to_string());
     } else {
         let mut outcome = OUTCOME.lock().unwrap();
+        let mut key_outcome = KEY_OUTCOME.lock().unwrap(); 
         outcome.insert(category.to_string(), Vec::new());
+        key_outcome.push(category.to_string());
     }
-}
-
-#[flutter_rust_bridge::frb(sync)]
-pub fn test() -> String {
-    println!("Test function called");
-    let res;
-    {
-        let result = RESULT.lock().unwrap();
-        if result.len() < 2 {
-            return format!("Not enough dataaaa");
-        }    
-        let a = result[0].amount;
-        let b = result[1].amount;
-        
-        res = a + b;
-    }
-
-    return format!("{}", res);
-}
-
-#[flutter_rust_bridge::frb(sync)]
-pub fn get_outcome_data() -> HashMap<String, f64> {
-    let outcome = OUTCOME.lock().unwrap();
-    outcome.iter().map(|(k, v)| (k.clone(), v.iter().map(|spent| spent.amount).sum())).collect()
-}
-
-#[flutter_rust_bridge::frb(sync)]
-pub fn get_income_data() -> HashMap<String, f64> {
-    let income = INCOME.lock().unwrap();
-    income.iter().map(|(k, v)| (k.clone(), v.iter().map(|spent| spent.amount).sum())).collect()
 }
 
 #[flutter_rust_bridge::frb(sync)]
