@@ -2,7 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:front/pages/outcome_page.dart';
-import 'package:front/pages/sort_page.dart';
+// import 'package:front/pages/sort_page.dart';
+import 'package:front/pages/new_sort_page.dart';
 
 import 'pages/income_pages.dart';
 
