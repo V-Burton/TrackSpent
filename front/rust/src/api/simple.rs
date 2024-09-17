@@ -255,9 +255,101 @@ pub struct YourResponseType {
 
 
 //////////////////////////////////
-/// 
-/// 
-/// ///
+/// API trueLayer ////////////////
+/// ///////////////////////////////
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TrueLayerTransaction {
+    timestamp: String,
+    description: String,
+    #[serde(rename = "transaction_type")]
+    transaction_type: String,
+    #[serde(rename = "transaction_category")]
+    transaction_category: String,
+    #[serde(rename = "transaction_classification")]
+    transaction_classification: Vec<String>,
+    amount: f64,
+    currency: String,
+    #[serde(rename = "transaction_id")]
+    transaction_id: String,
+    #[serde(rename = "provider_transaction_id")]
+    provider_transaction_id: String,
+    #[serde(rename = "normalised_provider_transaction_id")]
+    normalised_provider_transaction_id: String,
+    #[serde(rename = "running_balance")]
+    running_balance: Option<RunningBalance>,
+    meta: MetaData,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RunningBalance {
+    currency: String,
+    amount: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MetaData {
+    #[serde(rename = "provider_transaction_category")]
+    provider_transaction_category: String,
+}
+
+
+pub fn process_truelayer_transactions(transactions: Vec<TrueLayerTransaction>) {
+    let mut result = RESULT.lock().unwrap();
+
+    for transaction in transactions {
+        let reason = transaction.description;
+        let date_str = &transaction.timestamp[..10]; // Extraire la date (YYYY-MM-DD)
+        let date = NaiveDate::parse_from_str(date_str, "%Y-%m-%d").expect("Unable to parse date");
+        
+        let spent = Spent {
+            reason,
+            date,
+            amount: transaction.amount,
+        };
+
+        println!("Adding transaction from TrueLayer: {:?}", spent);
+        result.push_front(spent);
+    }
+    println!("Total transactions in RESULT after TrueLayer update: {}", result.len());
+}
+
+pub async fn fetch_and_process_truelayer_transactions(client: &Client, access_token: &str) -> Result<(), Box<dyn std::error::Error>> {
+    let url = "https://api.truelayer.com/data/v1/accounts/transactions"; // Exemple d'URL pour TrueLayer
+
+    let response = client
+        .get(url)
+        .bearer_auth(access_token)
+        .send()
+        .await?
+        .json::<HashMap<String, Vec<TrueLayerTransaction>>>()
+        .await?;
+
+    if let Some(transactions) = response.get("results") {
+        process_truelayer_transactions(transactions.clone());
+    } else {
+        println!("No transactions found.");
+    }
+
+    Ok(())
+}
+
+//Exemple de main pour run 
+// #[tokio::main]
+// async fn main() {
+//     let client = Client::new();
+//     let access_token = "your_access_token_here"; // Ton token d'accès
+
+//     match fetch_and_process_truelayer_transactions(&client, access_token).await {
+//         Ok(_) => println!("Transactions fetched and processed successfully."),
+//         Err(e) => eprintln!("Error fetching transactions: {}", e),
+//     }
+// }
+
+
+/// //////////////////////////////////////
+/// Initialize the result with dummy data
+/// //////////////////////////////////////
 pub fn initialize_result_with_dummy_data() {
     let mut result = RESULT.lock().unwrap();
 
