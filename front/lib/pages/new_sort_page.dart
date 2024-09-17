@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:front/pages/sort_page.dart';
 import 'package:front/src/rust/api/simple.dart';
 
 class SortPage extends StatefulWidget {
