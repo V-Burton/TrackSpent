@@ -3,6 +3,7 @@ use chrono::{NaiveDate, Datelike};
 use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
 use std::vec;
+use reqwest::Client;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Transaction {
@@ -226,6 +227,30 @@ pub fn get_income_data_by_date(month: u32, year: i32) -> HashMap<String, f64> {
     let income = INCOME.lock().unwrap();
     income.iter().map(|(k, v)| (k.clone(), v.iter().filter(|spent| spent.date.month() == month && spent.date.year() == year).map(|spent| spent.amount).sum())).collect()
 }
+
+
+/////////////////////////////
+/// CALL API ////////////////
+/////////////////////////////
+
+pub struct YourResponseType {
+    pub field1: String,
+    pub field2: i32,
+}
+
+// #[flutter_rust_bridge::frb(sync)]
+// async fn call_treulayer_api() -> Result<YourResponseType, reqwest::Error> {
+//     let client = Client::new();
+//     let res = client
+//         .get("https://api.treulayer.com/your_endpoint")
+//         .header("Authorization", "Bearer YOUR_API_KEY")
+//         .send()
+//         .await?;
+
+//     let json = res.json::<YourResponseType>().await?;
+//     Ok(json)
+// }
+
 
 
 
