@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 use lazy_static::lazy_static;
 use std::vec;
 
+//DB
+use rusqlite::{Connection, Result};
+use jsonwebtoken::{encode, Header, EncodingKey};
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Transaction {
     id: String,
@@ -101,31 +105,32 @@ pub fn get_key_outcome() -> Vec<String> {
 pub fn init_app() {
     intialize();
     initialize_result_with_dummy_data();
+    init_db().unwrap();
 }
 
 pub fn intialize() {
     let mut outcome = OUTCOME.lock().unwrap();
     let mut income = INCOME.lock().unwrap();
-    let mut keyIncome = KEY_INCOME.lock().unwrap();
-    let mut keyOutcome = KEY_OUTCOME.lock().unwrap();
+    let mut key_income = KEY_INCOME.lock().unwrap();
+    let mut key_outcome = KEY_OUTCOME.lock().unwrap();
 
     outcome.insert("Charges".to_string(), Vec::new());
     outcome.insert("Food".to_string(), Vec::new());
     outcome.insert("Save".to_string(), Vec::new());
     outcome.insert("Other".to_string(), Vec::new());
-    keyOutcome.push("Charges".to_string());
-    keyOutcome.push("Food".to_string());
-    keyOutcome.push("Save".to_string());
-    keyOutcome.push("Other".to_string());
+    key_outcome.push("Charges".to_string());
+    key_outcome.push("Food".to_string());
+    key_outcome.push("Save".to_string());
+    key_outcome.push("Other".to_string());
 
     income.insert("Revenu".to_string(), Vec::new());
     income.insert("Refund".to_string(), Vec::new());
     income.insert("Gift".to_string(), Vec::new());
     income.insert("Other".to_string(), Vec::new());
-    keyIncome.push("Revenu".to_string());
-    keyIncome.push("Refund".to_string());
-    keyIncome.push("Gift".to_string());
-    keyIncome.push("Other".to_string());
+    key_income.push("Revenu".to_string());
+    key_income.push("Refund".to_string());
+    key_income.push("Gift".to_string());
+    key_income.push("Other".to_string());
 
 }
 
@@ -227,6 +232,97 @@ pub fn get_income_data_by_date(month: u32, year: i32) -> HashMap<String, f64> {
     income.iter().map(|(k, v)| (k.clone(), v.iter().filter(|spent| spent.date.month() == month && spent.date.year() == year).map(|spent| spent.amount).sum())).collect()
 }
 
+/////////////////////////////////////
+
+
+lazy_static! {
+    static ref DB_CONN: std::sync::Mutex<Connection> = std::sync::Mutex::new(init_db().unwrap());
+}
+
+fn init_db() -> Result<Connection> {
+    let conn = Connection::open("user_database.db")?;
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY,
+            username TEXT NOT NULL UNIQUE,
+            hashed_password TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )",
+        [],
+    )?;
+    Ok(conn)
+
+}
+
+fn register_user(username: &str, password: &str) -> Result<(), rusqlite::Error> {
+    let conn = DB_CONN.lock().unwrap();
+    let hashed_password = hash_password(password);
+    conn.execute(
+        "INSERT INTO users (username, hashed_password, created_at) VALUES (?1, ?2, datetime('now'))",
+        [username, &hashed_password],
+    )?;
+    Ok(())
+}
+
+fn authenticate_user(username: &str, password: &str) -> Result<bool, rusqlite::Error> {
+    let conn = DB_CONN.lock().unwrap();
+    let mut stmt = conn.prepare("SELECT hashed_password FROM users WHERE username = ?1")?;
+    let stored_hashed_password: String = stmt.query_row([username], |row| row.get(0))?;
+
+    Ok(verify_password(&stored_hashed_password, password))
+}
+
+fn hash_password(password: &str) -> String {
+    bcrypt::hash(password, 4).unwrap()
+}
+
+fn verify_password(stored_hashed_password: &str, password: &str) -> bool {
+    bcrypt::verify(password, stored_hashed_password).unwrap_or(false)
+}
+
+#[derive(Serialize, Deserialize)]
+struct Claims {
+    sub: String,
+    exp: usize,
+}
+
+// #[flutter_rust_bridge::frb(sync)]
+// pub fn rust_register_user(username: &str, password: &str) -> bool {
+//     match register_user(username, password) {
+//         Ok(_) => true,
+//         Err(_) => false,
+//     }
+// }
+
+// #[flutter_rust_bridge::frb(sync)]
+// pub fn rust_authenticate_user(username: &str, password: &str) -> bool {
+//     match authenticate_user(username, password) {
+//         Ok(valid) => valid,
+//         Err(_) => false,
+//     }
+// }
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn generate_token(username: &str) -> String {
+    let expiration = chrono::Utc::now()
+        .checked_add_signed(chrono::Duration::hours(24)) 
+        .expect("invalid timestamp")
+        .timestamp() as usize;
+
+    let claims = Claims {
+        sub: username.to_owned(),
+        exp: expiration,
+    };
+
+    let token = encode(
+        &Header::default(),
+        &claims,
+        &EncodingKey::from_secret("secret_key".as_ref()),  // Replace secret_key
+    )
+    .unwrap();
+
+    token
+}
 
 
 //////////////////////////////////

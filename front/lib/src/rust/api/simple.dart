@@ -7,9 +7,9 @@ import '../frb_generated.dart';
 import '../lib.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `remove_spent`
-// These types are ignored because they are not used by any `pub` functions: `Amount`, `Dates`, `Descriptions`, `INCOME`, `KEY_INCOME`, `KEY_OUTCOME`, `OUTCOME`, `RESULT`, `Transaction`, `Types`, `ValueDetail`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `deref`, `deref`, `deref`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`
+// These functions are ignored because they are not marked as `pub`: `authenticate_user`, `hash_password`, `init_db`, `register_user`, `remove_spent`, `verify_password`
+// These types are ignored because they are not used by any `pub` functions: `Amount`, `Claims`, `DB_CONN`, `Dates`, `Descriptions`, `INCOME`, `KEY_INCOME`, `KEY_OUTCOME`, `OUTCOME`, `RESULT`, `Transaction`, `Types`, `ValueDetail`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `deref`, `deref`, `deref`, `deref`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`, `initialize`
 
 Future<String> getFormattedDate({required NaiveDate date}) =>
     RustLib.instance.api.crateApiSimpleGetFormattedDate(date: date);
@@ -52,15 +52,27 @@ void addNewCategory({required String category, required bool income}) =>
 
 Future<Map<String, double>> getOutcomeDataByDate(
         {required int month, required int year}) async {
-          return await RustLib.instance.api
+          return RustLib.instance.api
         .crateApiSimpleGetOutcomeDataByDate(month: month, year: year);
         }
 
 Future<Map<String, double>> getIncomeDataByDate(
         {required int month, required int year}) async {
-    return await RustLib.instance.api
+    return RustLib.instance.api
         .crateApiSimpleGetIncomeDataByDate(month: month, year: year);
         }
+
+bool rustRegisterUser({required String username, required String password}) =>
+    RustLib.instance.api
+        .crateApiSimpleRustRegisterUser(username: username, password: password);
+
+bool rustAuthenticateUser(
+        {required String username, required String password}) =>
+    RustLib.instance.api.crateApiSimpleRustAuthenticateUser(
+        username: username, password: password);
+
+String generateToken({required String username}) =>
+    RustLib.instance.api.crateApiSimpleGenerateToken(username: username);
 
 ///
 ///

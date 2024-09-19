@@ -41,7 +41,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.2.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 110992614;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1105817425;
 
 // Section: executor
 
@@ -434,6 +434,37 @@ fn wire__crate__api__simple__add_to_outcome_impl(
                 let output_ok = Result::<_, ()>::Ok({
                     crate::api::simple::add_to_outcome(&api_category, api_spent);
                 })?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__simple__generate_token_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "generate_token",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_username = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok =
+                    Result::<_, ()>::Ok(crate::api::simple::generate_token(&api_username))?;
                 Ok(output_ok)
             })())
         },
@@ -871,6 +902,74 @@ fn wire__crate__api__simple__push_transaction_to_result_impl(
         },
     )
 }
+fn wire__crate__api__simple__rust_authenticate_user_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "rust_authenticate_user",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_username = <String>::sse_decode(&mut deserializer);
+            let api_password = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok(crate::api::simple::rust_authenticate_user(
+                    &api_username,
+                    &api_password,
+                ))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
+fn wire__crate__api__simple__rust_register_user_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "rust_register_user",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_username = <String>::sse_decode(&mut deserializer);
+            let api_password = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, ()>((move || {
+                let output_ok = Result::<_, ()>::Ok(crate::api::simple::rust_register_user(
+                    &api_username,
+                    &api_password,
+                ))?;
+                Ok(output_ok)
+            })())
+        },
+    )
+}
 
 // Section: related_funcs
 
@@ -1062,17 +1161,17 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        10 => wire__crate__api__simple__get_formatted_date_impl(port, ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__simple__get_spent_impl(port, ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__simple__initialize_result_with_dummy_data_impl(
+        11 => wire__crate__api__simple__get_formatted_date_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__simple__get_spent_impl(port, ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__simple__initialize_result_with_dummy_data_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        19 => wire__crate__api__simple__intialize_impl(port, ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__simple__parse_and_use_date_impl(port, ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__simple__push_transaction_to_result_impl(
+        20 => wire__crate__api__simple__intialize_impl(port, ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__simple__parse_and_use_date_impl(port, ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__simple__push_transaction_to_result_impl(
             port,
             ptr,
             rust_vec_len,
@@ -1119,15 +1218,18 @@ fn pde_ffi_dispatcher_sync_impl(
         7 => wire__crate__api__simple__add_new_category_impl(ptr, rust_vec_len, data_len),
         8 => wire__crate__api__simple__add_to_income_impl(ptr, rust_vec_len, data_len),
         9 => wire__crate__api__simple__add_to_outcome_impl(ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__simple__get_income_data_by_date_impl(ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__simple__get_key_income_impl(ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__simple__get_key_outcome_impl(ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__simple__get_outcome_data_by_date_impl(ptr, rust_vec_len, data_len),
-        16 => wire__crate__api__simple__get_value_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__simple__init_app_impl(ptr, rust_vec_len, data_len),
-        20 => {
+        10 => wire__crate__api__simple__generate_token_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__simple__get_income_data_by_date_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__simple__get_key_income_impl(ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__simple__get_key_outcome_impl(ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__simple__get_outcome_data_by_date_impl(ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__simple__get_value_impl(ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__simple__init_app_impl(ptr, rust_vec_len, data_len),
+        21 => {
             wire__crate__api__simple__load_transactions_from_file_impl(ptr, rust_vec_len, data_len)
         }
+        24 => wire__crate__api__simple__rust_authenticate_user_impl(ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__simple__rust_register_user_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
