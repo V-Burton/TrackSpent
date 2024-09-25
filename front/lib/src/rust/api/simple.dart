@@ -61,7 +61,7 @@ Future<Map<String, double>> getIncomeDataByDate(
     return RustLib.instance.api
         .crateApiSimpleGetIncomeDataByDate(month: month, year: year);
         }
-
+        
 bool rustRegisterUser({required String username, required String password}) =>
     RustLib.instance.api
         .crateApiSimpleRustRegisterUser(username: username, password: password);

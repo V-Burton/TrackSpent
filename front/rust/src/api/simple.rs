@@ -286,21 +286,21 @@ struct Claims {
     exp: usize,
 }
 
-// #[flutter_rust_bridge::frb(sync)]
-// pub fn rust_register_user(username: &str, password: &str) -> bool {
-//     match register_user(username, password) {
-//         Ok(_) => true,
-//         Err(_) => false,
-//     }
-// }
+#[flutter_rust_bridge::frb(sync)]
+pub fn rust_register_user(username: &str, password: &str) -> bool {
+    match register_user(username, password) {
+        Ok(_) => true,
+        Err(_) => false,
+    }
+}
 
-// #[flutter_rust_bridge::frb(sync)]
-// pub fn rust_authenticate_user(username: &str, password: &str) -> bool {
-//     match authenticate_user(username, password) {
-//         Ok(valid) => valid,
-//         Err(_) => false,
-//     }
-// }
+#[flutter_rust_bridge::frb(sync)]
+pub fn rust_authenticate_user(username: &str, password: &str) -> bool {
+    match authenticate_user(username, password) {
+        Ok(valid) => valid,
+        Err(_) => false,
+    }
+}
 
 #[flutter_rust_bridge::frb(sync)]
 pub fn generate_token(username: &str) -> String {
