@@ -60,6 +60,16 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  Future<void> _logout() async {
+  final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('auth_token');
+
+    setState(() {
+      _isAuthenticated = false;
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     if (!_isAuthenticated) {
@@ -75,6 +85,12 @@ class _MyAppState extends State<MyApp> {
             const Text("Outcome"),
             const Text("Income"),
             ][_currentIndex],
+            actions: [
+              IconButton(
+                icon: Icon(Icons.logout),
+                onPressed: _logout,
+                ),
+            ],
         ),
         body: [
           const SortPage(),
