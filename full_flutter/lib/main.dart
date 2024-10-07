@@ -7,12 +7,14 @@ import 'package:provider/provider.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:uni_links/uni_links.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
+// import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
+import 'dart:math';
+import 'package:crypto/crypto.dart';
+
 
 import 'pages/income_pages.dart';
 import 'pages/spent.dart';
@@ -65,48 +67,9 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _handleIncomingLinks();
-    _checkInitialLink();
     _checkAuthentication();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<SpentModel>(context, listen: false).initializeDummyData();
-    });
-  }
-
-  void _checkInitialLink() async {
-    try {
-      final initialUri = await getInitialUri();
-      if (initialUri != null) {
-        print('Lien initial reçu : $initialUri');
-        if (initialUri.scheme == 'trackspent' &&
-            initialUri.host == 'auth' &&
-            initialUri.path == '/callback') {
-          final code = initialUri.queryParameters['code'];
-          if (code != null) {
-            _exchangeAuthorizationCode(code);
-          }
-        }
-      }
-    }  catch (err) {
-      print('Erreur lors de la réception du lien initial : $err');
-    }
-  }
-
-
-  void _handleIncomingLinks() {
-    // Écoute des liens entrants
-    _sub = uriLinkStream.listen((Uri? uri) {
-      print('Lien entrant reçu : $uri');
-      if (uri != null && uri.scheme == 'trackspent') {
-        if (uri.host == 'auth' && uri.path == '/callback') {
-          final code = uri.queryParameters['code'];
-          if (code != null) {
-            _exchangeAuthorizationCode(code);
-          }
-        }
-      }
-    }, onError: (Object err) {
-      print('Erreur lors de la réception du lien : $err');
     });
   }
 
@@ -117,6 +80,9 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _exchangeAuthorizationCode(String code) async {
+    final codeVerifier = await secureStorage.read(key: 'pkce_code_verifier');
+    print('Échange du code d\'autorisation : $codeVerifier');
+
     // Votre code pour échanger le code d'autorisation contre un jeton d'accès
     final response = await http.post(
       Uri.parse('https://auth.truelayer-sandbox.com/connect/token'),
@@ -124,9 +90,10 @@ class _MyAppState extends State<MyApp> {
       body: {
         'grant_type': 'authorization_code',
         'client_id': clientId,
+        'client_secret': '369a3b87-3268-46b4-ac15-dcc5092de1a4',
         'redirect_uri': redirectUri,
         'code': code,
-        // N'incluez pas client_secret pour les clients publics
+        'code_verifier': codeVerifier,
       },
     );
 
@@ -142,7 +109,7 @@ class _MyAppState extends State<MyApp> {
         _isAuthenticatedWithTrueLayer = true;
       });
     } else {
-      print('Échec de l\'échange du code : ${response.body}');
+      print('Échec de l\'échange du code... : ${response.body}');
       // Gérer l'erreur (afficher un message, etc.)
     }
   }
@@ -177,41 +144,62 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-Future<void> _authenticateWithTrueLayerManual() async {
-  final authorizationUrl = Uri.https(
-    'auth.truelayer-sandbox.com',
-    '/',
-    {
-      'response_type': 'code',
-      'client_id': clientId,
-      'redirect_uri': redirectUri,
-      'scope': scope,
-      'providers': 'uk-cs-mock uk-ob-all uk-oauth-all',
-      'state': 'random_state_string',
-    },
-  );
+  Future<void> _authenticateWithTrueLayerManual() async {
+    final String codeVerifier = _createCodeVerifier();
+    final String codeChallenge = _createCodeChallenge(codeVerifier);
+    print('Code verifier : $codeVerifier');
+    await secureStorage.write(key: 'pkce_code_verifier', value: codeVerifier);
+    final storedCodeVerifier = await secureStorage.read(key: 'pkce_code_verifier');
+    print("Code verifier lu depuis secure storage : $storedCodeVerifier");
 
-  final urlString = authorizationUrl.toString();
 
-  // if (await canLaunch(urlString)) {
-  //   await launch(urlString);
-  // } else {
-  //   throw 'Could not launch $urlString';
-  // }
-  try {
-    final result = await FlutterWebAuth.authenticate(
-      url: urlString,
-      callbackUrlScheme: 'trackspent',
+    final authorizationUrl = Uri.https(
+      'auth.truelayer-sandbox.com',
+      '/',
+      {
+        'response_type': 'code',
+        'client_id': clientId,
+        'redirect_uri': redirectUri,
+        'scope': scope,
+        'providers': 'uk-cs-mock uk-ob-all uk-oauth-all',
+        'state': 'random_state_string',
+        'code_challenge': codeChallenge,
+        'code_challenge_method': 'S256',
+      },
     );
 
-    final code = Uri.parse(result).queryParameters['code'];
-    if (code != null) {
-      await _exchangeAuthorizationCode(code);
+    final urlString = authorizationUrl.toString();
+
+    try {
+      print('URL de redirection : $urlString');
+      print('Schéma de callback : trackspent');
+      final result = await FlutterWebAuth2.authenticate(
+        url: urlString,
+        callbackUrlScheme: 'trackspent',
+      );
+      print('Résultat de l\'authentification : $result');
+
+      final code = Uri.parse(result).queryParameters['code'];
+      if (code != null) {
+        await _exchangeAuthorizationCode(code);
+      }
+    } catch (e) {
+      print('Erreur lors de l\'authentification : $e');
     }
-  } catch (e) {
-    print('Erreur lors de l\'authentification : $e');
   }
-}
+
+  String _createCodeVerifier() {
+    final random = Random.secure();
+    return List.generate(128, (index) => random.nextInt(256)).map((e) => e.toRadixString(16)).join();
+  }
+
+  String _createCodeChallenge(String codeVerifier) {
+    final bytes = utf8.encode(codeVerifier);
+    final digest = sha256.convert(bytes);
+    return base64UrlEncode(digest.bytes).replaceAll('=', '');
+  }
+
+
 
   Future<void> _logout() async {
     final prefs = await SharedPreferences.getInstance();
