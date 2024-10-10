@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:full_flutter/pages/outcome_page.dart';
 import 'package:full_flutter/pages/sort_page.dart';
@@ -8,7 +7,6 @@ import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-// import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'dart:async';
@@ -16,10 +14,11 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 
 
+
 import 'pages/income_pages.dart';
 import 'pages/spent.dart';
 
-final FlutterAppAuth appAuth = FlutterAppAuth();
+const FlutterAppAuth appAuth = FlutterAppAuth();
 final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
 
@@ -39,13 +38,12 @@ final List<String> scopes = [
 final String scope = scopes.join(' ');
 
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => SpentModel()),
-      ],
+    ChangeNotifierProvider(
+      create: (_) => SpentModel(),
       child: MyApp(),
     ),
   );
@@ -62,7 +60,7 @@ class _MyAppState extends State<MyApp> {
   int _currentIndex = 0;
   bool _isAuthenticated = false;
   bool _isAuthenticatedWithTrueLayer = false;
-  StreamSubscription? _sub;
+  // StreamSubscription? _sub;
 
   @override
   void initState() {
@@ -73,11 +71,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  @override
-  void dispose() {
-    _sub?.cancel();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   _sub?.cancel();
+  //   super.dispose();
+  // }
+
+  // @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkAuthentication();
+    }
+  } 
 
   Future<void> _exchangeAuthorizationCode(String code) async {
     final codeVerifier = await secureStorage.read(key: 'pkce_code_verifier');
@@ -137,14 +142,14 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-
   setCurrentIndex(int index) async {
     setState(() {
       _currentIndex = index;
     });
   }
 
-  Future<void> _authenticateWithTrueLayerManual() async {
+
+  Future<void> _authenticateWithTrueLayer() async {
     final String codeVerifier = _createCodeVerifier();
     final String codeChallenge = _createCodeChallenge(codeVerifier);
     print('Code verifier : $codeVerifier');
@@ -173,15 +178,30 @@ class _MyAppState extends State<MyApp> {
     try {
       print('URL de redirection : $urlString');
       print('Schéma de callback : trackspent');
-      final result = await FlutterWebAuth2.authenticate(
-        url: urlString,
-        callbackUrlScheme: 'trackspent',
+      // final result = await FlutterWebAuth2.authenticate(
+      //   url: urlString,
+      //   callbackUrlScheme: 'trackspent',
+      // );
+      final AuthorizationTokenResponse? result = await appAuth.authorizeAndExchangeCode(
+      AuthorizationTokenRequest(
+        clientId,
+        redirectUri,
+        issuer: 'https://auth.truelayer-sandbox.com/',
+        scopes: scopes,
+        serviceConfiguration: AuthorizationServiceConfiguration(
+          authorizationEndpoint: 'https://auth.truelayer-sandbox.com/',
+          tokenEndpoint: 'https://auth.truelayer-sandbox.com/connect/token',
+        ),
+        additionalParameters: {
+          'providers': 'uk-cs-mock uk-ob-all uk-oauth-all',
+        },
+      ),
       );
       print('Résultat de l\'authentification : $result');
 
-      final code = Uri.parse(result).queryParameters['code'];
+      final code = result;
       if (code != null) {
-        await _exchangeAuthorizationCode(code);
+        await _exchangeAuthorizationCode(code.toString());
       }
     } catch (e) {
       print('Erreur lors de l\'authentification : $e');
@@ -232,7 +252,7 @@ class _MyAppState extends State<MyApp> {
           ),
           body: Center(
             child: ElevatedButton(
-              onPressed: _authenticateWithTrueLayerManual,
+              onPressed: _authenticateWithTrueLayer,
               child: const Text('Connecter mon compte bancaire'),
             ),
           ),

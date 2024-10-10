@@ -25,15 +25,14 @@ dependencies:
   provider: ^6.0.0
   json_annotation: ^4.7.0
   oauth2: ^2.0.0
-  url_launcher: ^6.0.17
+  url_launcher: ^6.1.7
   http: ^1.2.2 
   flutter_dotenv: ^5.0.2
-  webview_flutter: ^4.0.1
-  flutter_appauth: ^5.0.0
+  webview_flutter: ^4.9.0
+  flutter_appauth: ^7.0.0
   flutter_secure_storage: ^5.0.2
   uni_links: ^0.5.1
-  flutter_web_auth: ^0.5.0
-
+  flutter_web_auth_2: ^4.0.0
 
 dev_dependencies:
   flutter_test:

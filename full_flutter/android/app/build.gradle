@@ -42,7 +42,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
-        manifestPlaceholders = [appAuthRedirectScheme: "trackSpent", applicationName: "trackSpent"]
+        manifestPlaceholders = [appAuthRedirectScheme: "trackspent"]
 
 
     }
