@@ -22,7 +22,7 @@ const FlutterAppAuth appAuth = FlutterAppAuth();
 final FlutterSecureStorage secureStorage = const FlutterSecureStorage();
 
 
-const String clientId = 'sandbox-trackspent-f42a7b';
+const String clientId = 'sandbox-newtackspent-e90e63';
 const String redirectUri = 'trackspent://auth/callback';
 const String issuer = 'https://auth.truelayer-sandbox.com/';
 final List<String> scopes = [
@@ -95,7 +95,7 @@ class _MyAppState extends State<MyApp> {
       body: {
         'grant_type': 'authorization_code',
         'client_id': clientId,
-        'client_secret': '369a3b87-3268-46b4-ac15-dcc5092de1a4',
+        'client_secret': '',
         'redirect_uri': redirectUri,
         'code': code,
         'code_verifier': codeVerifier,
@@ -150,63 +150,66 @@ class _MyAppState extends State<MyApp> {
 
 
   Future<void> _authenticateWithTrueLayer() async {
-    final String codeVerifier = _createCodeVerifier();
-    final String codeChallenge = _createCodeChallenge(codeVerifier);
-    print('Code verifier : $codeVerifier');
-    await secureStorage.write(key: 'pkce_code_verifier', value: codeVerifier);
-    final storedCodeVerifier = await secureStorage.read(key: 'pkce_code_verifier');
-    print("Code verifier lu depuis secure storage : $storedCodeVerifier");
-
-
-    final authorizationUrl = Uri.https(
-      'auth.truelayer-sandbox.com',
-      '/',
-      {
-        'response_type': 'code',
-        'client_id': clientId,
-        'redirect_uri': redirectUri,
-        'scope': scope,
-        'providers': 'uk-cs-mock uk-ob-all uk-oauth-all',
-        'state': 'random_state_string',
-        'code_challenge': codeChallenge,
-        'code_challenge_method': 'S256',
-      },
-    );
-
-    final urlString = authorizationUrl.toString();
-
     try {
-      print('URL de redirection : $urlString');
-      print('Schéma de callback : trackspent');
-      // final result = await FlutterWebAuth2.authenticate(
-      //   url: urlString,
-      //   callbackUrlScheme: 'trackspent',
-      // );
-      final AuthorizationTokenResponse? result = await appAuth.authorizeAndExchangeCode(
-      AuthorizationTokenRequest(
-        clientId,
-        redirectUri,
-        issuer: 'https://auth.truelayer-sandbox.com/',
-        scopes: scopes,
-        serviceConfiguration: AuthorizationServiceConfiguration(
-          authorizationEndpoint: 'https://auth.truelayer-sandbox.com/',
-          tokenEndpoint: 'https://auth.truelayer-sandbox.com/connect/token',
+      // First step: Authorization request
+      final AuthorizationResponse? authorizationResponse = await appAuth.authorize(
+        AuthorizationRequest(
+          clientId,
+          redirectUri,
+          scopes: scopes,
+          serviceConfiguration: AuthorizationServiceConfiguration(
+            authorizationEndpoint: 'https://auth.truelayer-sandbox.com/connect/authorize',
+            tokenEndpoint: 'https://auth.truelayer-sandbox.com/connect/token',
+          ),
+          additionalParameters: {
+            'providers': 'uk-cs-mock uk-ob-all uk-oauth-all',
+          },
         ),
-        additionalParameters: {
-          'providers': 'uk-cs-mock uk-ob-all uk-oauth-all',
-        },
-      ),
       );
-      print('Résultat de l\'authentification : $result');
 
-      final code = result;
-      if (code != null) {
-        await _exchangeAuthorizationCode(code.toString());
+      if (authorizationResponse != null) {
+        final String? authorizationCode = authorizationResponse.authorizationCode;
+
+        // Second step: Token exchange using manual HTTP POST request
+        final response = await http.post(
+          Uri.parse('https://auth.truelayer-sandbox.com/connect/token'),
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: {
+            'grant_type': 'authorization_code',
+            'code': authorizationCode!,
+            'redirect_uri': redirectUri,
+            'client_id': clientId,
+            // No need for code_verifier; PKCE is handled automatically
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final accessToken = data['access_token'];
+          final refreshToken = data['refresh_token'];
+
+          await secureStorage.write(key: 'access_token', value: accessToken);
+          await secureStorage.write(key: 'refresh_token', value: refreshToken);
+
+          setState(() {
+            _isAuthenticatedWithTrueLayer = true;
+          });
+        } else {
+          print('Token exchange failed: ${response.body}');
+        }
+      } else {
+        print('Authorization failed or was canceled.');
       }
     } catch (e) {
       print('Erreur lors de l\'authentification : $e');
+      // if (e is PlatformException) {
+      //   print('PlatformException code: ${e.code}');
+      //   print('Details: ${e.details}');
+      //   print('Message: ${e.message}');
+      // }
     }
   }
+
 
   String _createCodeVerifier() {
     final random = Random.secure();
